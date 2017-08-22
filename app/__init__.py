@@ -27,8 +27,10 @@ def create_app(config_name):
     )
 
     from .main import main as main_blueprint
+    from .external.views.external import external as external_blueprint
 
     application.register_blueprint(main_blueprint, url_prefix='/user')
+    application.register_blueprint(external_blueprint)
 
     login_manager.login_view = 'main.render_login'
     login_manager.login_message_category = "must_login"
