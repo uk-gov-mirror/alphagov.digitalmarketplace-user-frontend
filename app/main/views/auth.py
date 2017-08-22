@@ -5,12 +5,10 @@ from __future__ import absolute_import
 import six
 
 from flask_login import current_user
-from flask import abort, current_app, flash, redirect, render_template, request, session, url_for, get_flashed_messages,\
-    Markup
+from flask import abort, current_app, flash, redirect, render_template, request, url_for, get_flashed_messages, Markup
 from flask_login import logout_user, login_user
 
 from dmapiclient import HTTPError
-from dmapiclient.audit import AuditTypes
 from dmutils.user import User
 from dmutils.email import (decode_invitation_token, decode_password_reset_token, generate_token, send_email)
 from dmutils.email.exceptions import EmailError

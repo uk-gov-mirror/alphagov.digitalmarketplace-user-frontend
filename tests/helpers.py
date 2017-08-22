@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import os
 import json
 import re
-import mock
 
 from app import create_app, data_api_client
 from datetime import datetime, timedelta
@@ -155,7 +154,7 @@ class BaseApplicationTest(object):
     @classmethod
     def _squashed_element_text(cls, element):
         return element.text + "".join(
-            cls._squashed_element_text(child_element)+child_element.tail for child_element in element
+            cls._squashed_element_text(child_element) + child_element.tail for child_element in element
         )
 
     def teardown_login(self):

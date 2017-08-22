@@ -1,7 +1,6 @@
 import os
-import hashlib
 import jinja2
-from dmutils.status import enabled_since, get_version_label
+from dmutils.status import get_version_label
 from dmutils.asset_fingerprint import AssetFingerprinter
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -17,7 +16,7 @@ class Config(object):
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
 
-    PERMANENT_SESSION_LIFETIME = 4*3600
+    PERMANENT_SESSION_LIFETIME = 4 * 3600
 
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None

@@ -19,8 +19,6 @@ def status():
         'status': data_api_client.get_status()
     }
 
-    apis_with_errors = []
-
     if api['status'] is None or api['status']['status'] != "ok":
         return jsonify(
             {api['key']: api['status']},
