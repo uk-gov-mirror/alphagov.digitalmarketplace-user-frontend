@@ -35,6 +35,7 @@ class Config(object):
     SECRET_KEY = None
     SHARED_EMAIL_KEY = None
     RESET_PASSWORD_SALT = 'ResetPasswordSalt'
+    INVITE_EMAIL_SALT = 'InviteEmailSalt'
 
     STATIC_URL_PATH = '/user/static'
     ASSET_PATH = STATIC_URL_PATH + '/'
