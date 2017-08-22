@@ -16,7 +16,7 @@ from dmutils.email import (decode_invitation_token, decode_password_reset_token,
 from dmutils.email.exceptions import EmailError
 
 from .. import main
-from ..forms.auth_forms import LoginForm, EmailAddressForm, ChangePasswordForm, CreateUserForm
+from ..forms.auth_forms import LoginForm, EmailAddressForm, ChangePasswordForm
 from ..helpers import hash_email
 from ..helpers.login_helpers import redirect_logged_in_user
 from ... import data_api_client
@@ -191,87 +191,3 @@ def update_password(token):
                                email_address=email_address,
                                form=form,
                                token=token), 400
-
-
-@main.route('/create-user/<string:encoded_token>', methods=["GET"])
-def create_user(encoded_token):
-    form = CreateUserForm()
-
-    token = decode_invitation_token(encoded_token)
-    if token is None:
-        current_app.logger.warning(
-            "createuser.token_invalid: {encoded_token}",
-            extra={'encoded_token': encoded_token})
-        return render_template(
-            "auth/create-buyer-user-error.html",
-            token=None), 400
-
-    user_json = data_api_client.get_user(email_address=token["email_address"])
-
-    if not user_json:
-        return render_template(
-            "auth/create-user.html",
-            form=form,
-            email_address=token['email_address'],
-            token=encoded_token), 200
-
-    user = User.from_json(user_json)
-    return render_template(
-        "auth/create-buyer-user-error.html",
-        token=token,
-        user=user), 400
-
-
-@main.route('/create-user/<string:encoded_token>', methods=["POST"])
-def submit_create_user(encoded_token):
-    form = CreateUserForm()
-    token = decode_invitation_token(encoded_token)
-    if token is None:
-        current_app.logger.warning("createuser.token_invalid: {encoded_token}",
-                                   extra={'encoded_token': encoded_token})
-        return render_template(
-            "auth/create-buyer-user-error.html",
-            token=None), 400
-
-    else:
-        if not form.validate_on_submit():
-            current_app.logger.warning(
-                "createuser.invalid: {form_errors}",
-                extra={'form_errors': ", ".join(form.errors)})
-            return render_template(
-                "auth/create-user.html",
-                form=form,
-                token=encoded_token,
-                email_address=token['email_address']), 400
-
-        try:
-            user = data_api_client.create_user({
-                'name': form.name.data,
-                'password': form.password.data,
-                'phoneNumber': form.phone_number.data,
-                'emailAddress': token['email_address'],
-                'role': 'buyer'
-            })
-
-            user = User.from_json(user)
-            login_user(user)
-
-        except HTTPError as e:
-            if e.message != 'invalid_buyer_domain' and e.status_code != 409:
-                raise
-
-            return render_template(
-                "auth/create-buyer-user-error.html",
-                error=e.message,
-                token=None), 400
-
-        flash('account-created', 'flag')
-        return redirect_logged_in_user()
-
-
-@main.route('/create-your-account-complete', methods=['GET'])
-def create_your_account_complete():
-    email_address = session.setdefault("email_sent_to", "the email address you supplied")
-    return render_template(
-        "auth/create-your-account-complete.html",
-        email_address=email_address), 200
