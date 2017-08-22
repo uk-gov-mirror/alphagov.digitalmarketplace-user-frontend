@@ -81,10 +81,10 @@ show-environment:
 docker-build:
 	$(if ${RELEASE_NAME},,$(eval export RELEASE_NAME=$(shell git describe)))
 	@echo "Building a docker image for ${RELEASE_NAME}..."
-	docker build -t digitalmarketplace/buyer-frontend --build-arg release_name=${RELEASE_NAME} .
-	docker tag digitalmarketplace/buyer-frontend digitalmarketplace/buyer-frontend:${RELEASE_NAME}
+	docker build -t digitalmarketplace/user-frontend --build-arg release_name=${RELEASE_NAME} .
+	docker tag digitalmarketplace/user-frontend digitalmarketplace/user-frontend:${RELEASE_NAME}
 
 .PHONY: docker-push
 docker-push:
 	$(if ${RELEASE_NAME},,$(eval export RELEASE_NAME=$(shell git describe)))
-	docker push digitalmarketplace/buyer-frontend:${RELEASE_NAME}
+	docker push digitalmarketplace/user-frontend:${RELEASE_NAME}
