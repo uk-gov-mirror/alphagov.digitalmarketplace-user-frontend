@@ -52,7 +52,7 @@ class ChangePasswordForm(Form):
     )
 
 
-class CreateUserForm(Form):
+class CreateBuyerUserForm(Form):
     name = StripWhitespaceStringField(
         'Your name', id="input_name",
         validators=[
@@ -84,3 +84,21 @@ class CreateUserForm(Form):
                    )
         ]
     )
+
+
+class CreateSupplierUserForm(Form):
+    name = StripWhitespaceStringField('Your name', validators=[
+        DataRequired(message="Please enter a name"),
+        Length(min=1,
+               max=255,
+               message="Names must be between 1 and 255 characters"
+               )
+    ])
+
+    password = PasswordField('Password', validators=[
+        DataRequired(message="Please enter a password"),
+        Length(min=10,
+               max=50,
+               message="Passwords must be between 10 and 50 characters"
+               )
+    ])

@@ -14,7 +14,8 @@ from dmutils.email import (decode_invitation_token, decode_password_reset_token,
 from dmutils.email.exceptions import EmailError
 
 from .. import main
-from ..forms.auth_forms import LoginForm, EmailAddressForm, ChangePasswordForm, CreateUserForm
+from ..forms.auth_forms import (LoginForm, EmailAddressForm, ChangePasswordForm,  # NOQA
+                                CreateBuyerUserForm, CreateSupplierUserForm)
 from ..helpers import hash_email
 from ..helpers.login_helpers import redirect_logged_in_user
 from ... import data_api_client
@@ -191,75 +192,100 @@ def update_password(token):
                                token=token), 400
 
 
-@main.route('/create-user/<string:encoded_token>', methods=["GET"])
-def create_user(encoded_token):
-    form = CreateUserForm()
+@main.route('/create-<string:role_param>/<string:encoded_token>', methods=["GET"])
+def create_user(role_param, encoded_token):
+    if role_param not in ['buyer', 'supplier']:
+        abort(404)
 
     token = decode_invitation_token(encoded_token)
+
     if token is None:
         current_app.logger.warning(
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token})
         return render_template(
-            "auth/create-buyer-user-error.html",
+            "auth/create-{}-user-error.html".format(role_param),
             token=None), 400
 
+    role = token["role"]
+    if role != role_param:
+        abort(400)
+
+    form = eval("Create{}UserForm()".format(role.capitalize()))
     user_json = data_api_client.get_user(email_address=token["email_address"])
 
     if not user_json:
         return render_template(
-            "auth/create-user.html",
-            form=form,
+            "auth/create-{}-user.html".format(role),
             email_address=token['email_address'],
+            form=form,
+            role=role,
+            supplier_name=token.get('supplier_name'),
             token=encoded_token), 200
 
     user = User.from_json(user_json)
     return render_template(
-        "auth/create-buyer-user-error.html",
+        "auth/create-{}-user-error.html".format(role),
         token=token,
         user=user), 400
 
 
-@main.route('/create-user/<string:encoded_token>', methods=["POST"])
-def submit_create_user(encoded_token):
-    form = CreateUserForm()
+@main.route('/create-<string:role_param>/<string:encoded_token>', methods=["POST"])
+def submit_create_user(role_param, encoded_token):
+    if role_param not in ['buyer', 'supplier']:
+        abort(404)
+
+    form = eval("Create{}UserForm()".format(role_param.capitalize()))
     token = decode_invitation_token(encoded_token)
+
     if token is None:
         current_app.logger.warning("createuser.token_invalid: {encoded_token}",
                                    extra={'encoded_token': encoded_token})
         return render_template(
-            "auth/create-buyer-user-error.html",
+            "auth/create-{}-user-error.html".format(role_param),
             token=None), 400
-
     else:
+        role = token["role"]
+        if role != role_param:
+            abort(400)
+
         if not form.validate_on_submit():
             current_app.logger.warning(
                 "createuser.invalid: {form_errors}",
                 extra={'form_errors': ", ".join(form.errors)})
             return render_template(
-                "auth/create-user.html",
+                "auth/create-{}-user.html".format(role),
                 form=form,
                 token=encoded_token,
-                email_address=token['email_address']), 400
+                email_address=token['email_address'],
+                supplier_name=token.get('supplier_name')), 400
 
         try:
-            user = data_api_client.create_user({
+            user_data = {
                 'name': form.name.data,
                 'password': form.password.data,
-                'phoneNumber': form.phone_number.data,
                 'emailAddress': token['email_address'],
-                'role': 'buyer'
-            })
+                'role': role
+            }
 
-            user = User.from_json(user)
+            if role == 'buyer':
+                user_data.update({'phoneNumber': form.phone_number.data})
+            else:
+                user_data.update({'supplierId': token['supplier_id']})
+
+            user_create_response = data_api_client.create_user(user_data)
+            user = User.from_json(user_create_response)
             login_user(user)
 
         except HTTPError as e:
-            if e.message != 'invalid_buyer_domain' and e.status_code != 409:
+            if (
+                (role == 'buyer' and e.message != 'invalid_buyer_domain' and e.status_code != 409) or
+                (role == 'supplier' and e.status_code != 409)
+            ):
                 raise
 
             return render_template(
-                "auth/create-buyer-user-error.html",
+                "auth/create-{}-user-error.html".format(role),
                 error=e.message,
                 token=None), 400
 
