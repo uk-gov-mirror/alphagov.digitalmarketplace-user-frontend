@@ -28,8 +28,11 @@ PASSWORD_UPDATED_MESSAGE = "You have successfully changed your password."
 PASSWORD_NOT_UPDATED_MESSAGE = "Could not update password due to an error."
 EMAIL_SENT_MESSAGE = Markup("""If the email address you've entered belongs to a Digital Marketplace account, we'll
     send a link to reset the password.""")
-BAD_TOKEN_MESSAGE = Markup("""This password reset link has expired. Enter your email address and we’ll send you a
+EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE = Markup("""This password reset link has expired. Enter your email address and we’ll send you a
     new one. Password reset links are only valid for 24 hours.""")
+INVALID_TOKEN_MESSAGE = Markup("""The link you used to create an account is not valid. Check you’ve entered the correct
+    link. If you still can’t create an account, email
+    <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>""")
 
 
 @main.route('/login', methods=["GET"])
@@ -153,7 +156,7 @@ def send_reset_password_email():
 def reset_password(token):
     decoded = decode_password_reset_token(token, data_api_client)
     if 'error' in decoded:
-        flash(BAD_TOKEN_MESSAGE, 'error')
+        flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, 'error')
         return redirect(url_for('.request_password_reset'))
 
     email_address = decoded['email']
@@ -169,7 +172,7 @@ def update_password(token):
     form = ChangePasswordForm()
     decoded = decode_password_reset_token(token, data_api_client)
     if 'error' in decoded:
-        flash(BAD_TOKEN_MESSAGE, 'error')
+        flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, 'error')
         return redirect(url_for('.request_password_reset'))
 
     user_id = decoded["user"]
@@ -192,31 +195,37 @@ def update_password(token):
                                token=token), 400
 
 
-@main.route('/create-<string:role_param>/<string:encoded_token>', methods=["GET"])
-def create_user(role_param, encoded_token):
-    if role_param not in ['buyer', 'supplier']:
-        abort(404)
-
+@main.route('/create/<string:encoded_token>', methods=["GET"])
+def create_user(encoded_token):
     token = decode_invitation_token(encoded_token)
 
     if token is None:
         current_app.logger.warning(
             "createuser.token_invalid: {encoded_token}",
-            extra={'encoded_token': encoded_token})
-        return render_template(
-            "auth/create-{}-user-error.html".format(role_param),
-            token=None), 400
+            extra={'encoded_token': encoded_token}
+        )
+        abort(400, INVALID_TOKEN_MESSAGE)
 
     role = token["role"]
-    if role != role_param:
-        abort(400)
+
+    if token.get('expired'):
+        current_app.logger.warning(
+            "createuser.token_expired: {encoded_token}",
+            extra={'encoded_token': encoded_token}
+        )
+        return render_template(
+            "auth/create-user-error.html",
+            error=None,
+            role=role,
+            token=None,
+            user=None), 400
 
     form = eval("Create{}UserForm()".format(role.capitalize()))
     user_json = data_api_client.get_user(email_address=token["email_address"])
 
     if not user_json:
         return render_template(
-            "auth/create-{}-user.html".format(role),
+            "auth/create-user.html",
             email_address=token['email_address'],
             form=form,
             role=role,
@@ -225,69 +234,78 @@ def create_user(role_param, encoded_token):
 
     user = User.from_json(user_json)
     return render_template(
-        "auth/create-{}-user-error.html".format(role),
+        "auth/create-user-error.html",
+        error=None,
+        role=role,
         token=token,
         user=user), 400
 
 
-@main.route('/create-<string:role_param>/<string:encoded_token>', methods=["POST"])
-def submit_create_user(role_param, encoded_token):
-    if role_param not in ['buyer', 'supplier']:
-        abort(404)
-
-    form = eval("Create{}UserForm()".format(role_param.capitalize()))
+@main.route('/create/<string:encoded_token>', methods=["POST"])
+def submit_create_user(encoded_token):
     token = decode_invitation_token(encoded_token)
 
     if token is None:
-        current_app.logger.warning("createuser.token_invalid: {encoded_token}",
-                                   extra={'encoded_token': encoded_token})
+        current_app.logger.warning(
+            "createuser.token_invalid: {encoded_token}",
+            extra={'encoded_token': encoded_token}
+        )
+        abort(400, INVALID_TOKEN_MESSAGE)
+
+    role = token["role"]
+
+    if token.get('expired'):
+        current_app.logger.warning(
+            "createuser.token_expired: {encoded_token}",
+            extra={'encoded_token': encoded_token}
+        )
         return render_template(
-            "auth/create-{}-user-error.html".format(role_param),
-            token=None), 400
-    else:
-        role = token["role"]
-        if role != role_param:
-            abort(400)
+            "auth/create-user-error.html",
+            error=None,
+            role=role,
+            token=None,
+            user=None), 400
 
-        if not form.validate_on_submit():
-            current_app.logger.warning(
-                "createuser.invalid: {form_errors}",
-                extra={'form_errors': ", ".join(form.errors)})
+    form = eval("Create{}UserForm()".format(role.capitalize()))
+
+    if not form.validate_on_submit():
+        current_app.logger.warning(
+            "createuser.invalid: {form_errors}",
+            extra={'form_errors': ", ".join(form.errors)})
+        return render_template(
+            "auth/create-user.html",
+            email_address=token['email_address'],
+            form=form,
+            role=role,
+            supplier_name=token.get('supplier_name'),
+            token=encoded_token), 400
+
+    try:
+        user_data = {
+            'name': form.name.data,
+            'password': form.password.data,
+            'emailAddress': token['email_address'],
+            'role': role
+        }
+
+        if role == 'buyer':
+            user_data.update({'phoneNumber': form.phone_number.data})
+        else:
+            user_data.update({'supplierId': token['supplier_id']})
+
+        user_create_response = data_api_client.create_user(user_data)
+        user = User.from_json(user_create_response)
+        login_user(user)
+
+    except HTTPError as e:
+        if e.status_code == 409 or e.message == 'invalid_buyer_domain':
             return render_template(
-                "auth/create-{}-user.html".format(role),
-                form=form,
-                token=encoded_token,
-                email_address=token['email_address'],
-                supplier_name=token.get('supplier_name')), 400
-
-        try:
-            user_data = {
-                'name': form.name.data,
-                'password': form.password.data,
-                'emailAddress': token['email_address'],
-                'role': role
-            }
-
-            if role == 'buyer':
-                user_data.update({'phoneNumber': form.phone_number.data})
-            else:
-                user_data.update({'supplierId': token['supplier_id']})
-
-            user_create_response = data_api_client.create_user(user_data)
-            user = User.from_json(user_create_response)
-            login_user(user)
-
-        except HTTPError as e:
-            if (
-                (role == 'buyer' and e.message != 'invalid_buyer_domain' and e.status_code != 409) or
-                (role == 'supplier' and e.status_code != 409)
-            ):
-                raise
-
-            return render_template(
-                "auth/create-{}-user-error.html".format(role),
+                "auth/create-user-error.html",
                 error=e.message,
+                role=role,
                 token=None), 400
+        else:
+            raise
 
-        flash('account-created', 'flag')
-        return redirect_logged_in_user()
+    flash('account-created', 'flag')
+    return redirect_logged_in_user()

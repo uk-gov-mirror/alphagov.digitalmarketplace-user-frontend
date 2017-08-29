@@ -1,6 +1,8 @@
 {% extends "_base_page.html" %}
 
-{% block page_title %}Create account error – Digital Marketplace{% endblock %}
+{% block page_title %}
+  {% if role == 'supplier' %}Create contributor account{% else %}Create account error{% endif %} - Digital Marketplace
+{% endblock %}
 
 {% block main_content %}
 
@@ -42,8 +44,13 @@
   </header>
   <p>
     The link you used to create an account may have expired.<br/>
-    Check you’ve entered the correct link or <a href="{{ url_for('external.create_buyer_account') }}">send a new one</a>.<br/>
-    If you still can’t create an account, email <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>
+    {% if role == 'buyer' %}
+      Check you’ve entered the correct link or <a href="{{ url_for('external.create_buyer_account') }}">send a new one</a>.<br/>
+      If you still can’t create an account, email <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>.
+    {% elif role == 'supplier' %}
+      Check you’ve entered the correct link or ask the person who invited you to send a new invitation.<br/>
+      If you still can’t create a contributor account, email <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>.
+    {% endif %}
   </p>
 
 {% elif user %}
@@ -66,7 +73,7 @@
       Email <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a> to unlock your account.
     </p>
 
-  {% elif user.role == 'supplier' %}
+  {% elif role == 'buyer' and user.role == 'supplier' %}
 
     <header class="page-heading-smaller">
       <h1>The details you provided are registered with a supplier.</h1>
@@ -77,6 +84,19 @@
       converted to a buyer account.</p>
     <p>
       Alternatively, <a href="{{ url_for('.render_login') }}">Log in</a> to your {{ user.supplier_name }} account.
+    </p>
+
+  {% elif role == 'supplier' and user.role == 'supplier' and token.get("supplier_id") != user.supplier_id %}
+
+    <header class="page-heading-smaller">
+      <h1>The details you provided are registered with another supplier.</h1>
+    </header>
+    <p>You were invited by ‘{{ token.get("supplier_name") }}’.</p>
+    <p>Your account is registered with ‘{{ user.supplier_name }}’.</p>
+    <br>
+    <p>
+      <a href="/login">Log in</a> to your {{ user.supplier_name }} account or email
+      <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a> to register your account with a different organisation.
     </p>
 
   {% else %}

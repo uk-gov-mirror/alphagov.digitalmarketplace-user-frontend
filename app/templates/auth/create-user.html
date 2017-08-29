@@ -1,6 +1,8 @@
 {% extends "_base_page.html" %}
 
-{% block page_title %}Create account – Digital Marketplace{% endblock %}
+{% block page_title %}
+  Create {% if role == 'supplier' %}contributor {% endif %}account – Digital Marketplace
+{% endblock %}
 
 {% block main_content %}
 
@@ -19,17 +21,23 @@
     </div>
 {% endif %}
 
+{% set headings = {
+    'buyer': 'Create a new Digital Marketplace account',
+    'supplier': "Create contributor account for {{ supplier_name }}"
+   }
+%}
+
 {%
   with
   smaller = true,
-  heading = "Create a new Digital Marketplace account",
+  heading = headings[role],
   context = email_address
 %}
   {% include "toolkit/page-heading.html" %}
 {% endwith %}
 
 
-    <form autocomplete="off" action="{{ url_for('.submit_create_user', role_param=role, encoded_token=token) }}" method="POST" id="createUserForm">
+    <form autocomplete="off" action="{{ url_for('.submit_create_user', encoded_token=token) }}" method="POST" id="createUserForm">
 
         <div class="grid-row">
             <div class="column-two-thirds">
@@ -54,23 +62,25 @@
                 </div>
                 {% endif %}
 
-                {% if form.phone_number.errors %}
-                    <div class="validation-wrapper">
-                {% endif %}
-                    <div class="question" id="{{ form.phone_number.name }}">
-                        {{ form.phone_number.label(class="question-heading") }}
-                        <p class="hint">
-                          If there are any urgent problems with your requirements, we need your phone number so the support team can help you fix them quickly.
-                        </p>
-                        {% if form.phone_number.errors %}
-                        <p class="validation-message" id="error-password-textbox">
-                            {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
-                        </p>
-                        {% endif %}
-                        {{ form.phone_number(class="text-box", autocomplete="off") }}
-                    </div>
-                {% if form.phone_number.errors %}
-                    </div>
+                {% if role == 'buyer' %}
+                  {% if form.phone_number.errors %}
+                      <div class="validation-wrapper">
+                  {% endif %}
+                      <div class="question" id="{{ form.phone_number.name }}">
+                          {{ form.phone_number.label(class="question-heading") }}
+                          <p class="hint">
+                            If there are any urgent problems with your requirements, we need your phone number so the support team can help you fix them quickly.
+                          </p>
+                          {% if form.phone_number.errors %}
+                          <p class="validation-message" id="error-password-textbox">
+                              {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
+                          </p>
+                          {% endif %}
+                          {{ form.phone_number(class="text-box", autocomplete="off") }}
+                      </div>
+                  {% if form.phone_number.errors %}
+                      </div>
+                  {% endif %}
                 {% endif %}
 
                 {% if form.password.errors %}
@@ -95,7 +105,7 @@
             {%
               with
               type = "save",
-              label = "Create account"
+              label = "{% if role == 'buyer' %}Create account{% elif role == 'supplier' %}Create contributor account{% endif %}"
             %}
               {% include "toolkit/button.html" %}
             {% endwith %}
