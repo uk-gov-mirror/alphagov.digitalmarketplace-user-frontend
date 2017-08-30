@@ -77,7 +77,7 @@ def process_login():
             next=next_url), 400
 
 
-@main.route('/logout', methods=["GET"])
+@main.route('/logout', methods=["POST"])
 def logout():
     logout_user()
     return redirect(url_for('.render_login'))

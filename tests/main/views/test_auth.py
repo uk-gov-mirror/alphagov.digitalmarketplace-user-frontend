@@ -176,7 +176,7 @@ class TestLogin(BaseApplicationTest):
             assert cookie_value["Domain"] == "127.0.0.1"
 
     def test_should_redirect_to_login_on_logout(self):
-        res = self.client.get('/user/logout')
+        res = self.client.post('/user/logout')
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
 
