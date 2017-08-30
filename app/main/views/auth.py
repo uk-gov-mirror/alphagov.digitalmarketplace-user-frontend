@@ -198,7 +198,7 @@ def update_password(token):
 def create_user(encoded_token):
     token = decode_invitation_token(encoded_token)
 
-    if token is None:
+    if token.get('error') == 'token_invalid':
         current_app.logger.warning(
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -207,7 +207,7 @@ def create_user(encoded_token):
 
     role = token["role"]
 
-    if token.get('expired'):
+    if token.get('error') == 'token_expired':
         current_app.logger.warning(
             "createuser.token_expired: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -245,7 +245,7 @@ def create_user(encoded_token):
 def submit_create_user(encoded_token):
     token = decode_invitation_token(encoded_token)
 
-    if token is None:
+    if token.get('error') == 'token_invalid':
         current_app.logger.warning(
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -254,7 +254,7 @@ def submit_create_user(encoded_token):
 
     role = token["role"]
 
-    if token.get('expired'):
+    if token.get('error') == 'token_expired':
         current_app.logger.warning(
             "createuser.token_expired: {encoded_token}",
             extra={'encoded_token': encoded_token}
