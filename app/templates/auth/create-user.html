@@ -23,7 +23,7 @@
 
 {% set headings = {
     'buyer': 'Create a new Digital Marketplace account',
-    'supplier': "Create contributor account for {{ supplier_name }}"
+    'supplier': "Create contributor account for " ~ supplier_name
    }
 %}
 
@@ -105,7 +105,7 @@
             {%
               with
               type = "save",
-              label = "{% if role == 'buyer' %}Create account{% elif role == 'supplier' %}Create contributor account{% endif %}"
+              label = "Create account" if role == 'buyer' else "Create contributor account"
             %}
               {% include "toolkit/button.html" %}
             {% endwith %}

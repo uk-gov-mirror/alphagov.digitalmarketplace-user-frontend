@@ -14,8 +14,7 @@ from dmutils.email import (decode_invitation_token, decode_password_reset_token,
 from dmutils.email.exceptions import EmailError
 
 from .. import main
-from ..forms.auth_forms import (LoginForm, EmailAddressForm, ChangePasswordForm,  # NOQA
-                                CreateBuyerUserForm, CreateSupplierUserForm)
+from ..forms.auth_forms import LoginForm, EmailAddressForm, ChangePasswordForm, CreateUserForm
 from ..helpers import hash_email
 from ..helpers.login_helpers import redirect_logged_in_user
 from ... import data_api_client
@@ -78,7 +77,7 @@ def process_login():
             next=next_url), 400
 
 
-@main.route('/logout', methods=["GET"])
+@main.route('/logout', methods=["POST"])
 def logout():
     logout_user()
     return redirect(url_for('.render_login'))
@@ -199,7 +198,7 @@ def update_password(token):
 def create_user(encoded_token):
     token = decode_invitation_token(encoded_token)
 
-    if token is None:
+    if token.get('error') == 'token_invalid':
         current_app.logger.warning(
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -208,7 +207,7 @@ def create_user(encoded_token):
 
     role = token["role"]
 
-    if token.get('expired'):
+    if token.get('error') == 'token_expired':
         current_app.logger.warning(
             "createuser.token_expired: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -220,7 +219,8 @@ def create_user(encoded_token):
             token=None,
             user=None), 400
 
-    form = eval("Create{}UserForm()".format(role.capitalize()))
+    form = CreateUserForm()
+
     user_json = data_api_client.get_user(email_address=token["email_address"])
 
     if not user_json:
@@ -245,7 +245,7 @@ def create_user(encoded_token):
 def submit_create_user(encoded_token):
     token = decode_invitation_token(encoded_token)
 
-    if token is None:
+    if token.get('error') == 'token_invalid':
         current_app.logger.warning(
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -254,7 +254,7 @@ def submit_create_user(encoded_token):
 
     role = token["role"]
 
-    if token.get('expired'):
+    if token.get('error') == 'token_expired':
         current_app.logger.warning(
             "createuser.token_expired: {encoded_token}",
             extra={'encoded_token': encoded_token}
@@ -266,7 +266,7 @@ def submit_create_user(encoded_token):
             token=None,
             user=None), 400
 
-    form = eval("Create{}UserForm()".format(role.capitalize()))
+    form = CreateUserForm()
 
     if not form.validate_on_submit():
         current_app.logger.warning(
@@ -290,7 +290,7 @@ def submit_create_user(encoded_token):
 
         if role == 'buyer':
             user_data.update({'phoneNumber': form.phone_number.data})
-        else:
+        elif role == 'supplier':
             user_data.update({'supplierId': token['supplier_id']})
 
         user_create_response = data_api_client.create_user(user_data)

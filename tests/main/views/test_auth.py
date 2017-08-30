@@ -176,7 +176,7 @@ class TestLogin(BaseApplicationTest):
             assert cookie_value["Domain"] == "127.0.0.1"
 
     def test_should_redirect_to_login_on_logout(self):
-        res = self.client.get('/user/logout')
+        res = self.client.post('/user/logout')
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
 
@@ -821,11 +821,9 @@ class TestSubmitCreateUser(BaseApplicationTest):
             assert 'The link you used to create an account may have expired.' in res.get_data(as_text=True)
 
     def test_should_be_an_error_if_missing_name_and_password(self):
-        page_validation_messages = [
-            ["You must enter a name", "You must enter a password"],
-            ["Please enter a name", "Please enter a password"]
-        ]
-        for role, validation_messages in zip(self.user_roles, page_validation_messages):
+        validation_messages = ["You must enter a name", "You must enter a password"]
+
+        for role in self.user_roles:
             token = self._generate_token(role=role)
             res = self.client.post(
                 '/user/create/{}'.format(token),
@@ -837,11 +835,9 @@ class TestSubmitCreateUser(BaseApplicationTest):
                 assert message in res.get_data(as_text=True)
 
     def test_should_be_an_error_if_too_short_name_and_password(self):
-        page_validation_messages = [
-            ["You must enter a name", "Passwords must be between 10 and 50 characters"],
-            ["Please enter a name", "Passwords must be between 10 and 50 characters"]
-        ]
-        for role, validation_messages in zip(self.user_roles, page_validation_messages):
+        validation_messages = ["You must enter a name", "Passwords must be between 10 and 50 characters"]
+
+        for role in self.user_roles:
             token = self._generate_token(role=role)
             res = self.client.post(
                 '/user/create/{}'.format(token),
