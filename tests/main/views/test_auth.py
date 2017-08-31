@@ -597,16 +597,21 @@ class TestCreateUser(BaseApplicationTest):
                     '/user/create/{}'.format(token)
                 )
 
-    def test_should_be_a_bad_request_if_token_expired(self):
-        for role in self.user_roles:
+    def test_should_render_correct_error_page_if_token_expired(self):
+        messages = [
+            'Check you’ve entered the correct link or <a href="/buyers/create">send a new one</a>',
+            'Check you’ve entered the correct link or ask the person who invited you to send a new invitation.'
+        ]
+        for role, message in zip(self.user_roles, messages):
             with freeze_time('2016-09-28 16:00:00'):
-                token = self._generate_token(role='buyer')
+                token = self._generate_token(role=role)
             res = self.client.get(
                 '/user/create/{}'.format(token)
             )
 
             assert res.status_code == 400
             assert 'The link you used to create an account may have expired.' in res.get_data(as_text=True)
+            assert message in res.get_data(as_text=True)
 
     @mock.patch('app.main.views.auth.data_api_client')
     def test_should_render_create_user_page_if_user_does_not_exist(self, data_api_client):
@@ -760,6 +765,106 @@ class TestCreateUser(BaseApplicationTest):
         assert res.status_code == 400
         assert u"You were invited by ‘Different Supplier Name’" in res.get_data(as_text=True)
         assert u"Your account is registered with ‘Supplier Name’" in res.get_data(as_text=True)
+
+    @mock.patch('app.main.views.auth.data_api_client')
+    def test_should_work_for_old_buyer_token_without_role(self, data_api_client):
+        data_api_client.get_user.return_value = None
+        token = generate_token(
+            {'email_address': 'test@example.com'},
+            self.app.config['SHARED_EMAIL_KEY'],
+            self.app.config['INVITE_EMAIL_SALT']
+        )
+
+        res = self.client.get(
+            '/user/create/{}'.format(token)
+        )
+        assert res.status_code == 200
+
+        for message in [
+            "Create a new Digital Marketplace account",
+            "Create account",
+            "test@example.com",
+            '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
+                % urllib.parse.quote(token)
+        ]:
+            assert message in res.get_data(as_text=True)
+
+    @mock.patch('app.main.views.auth.data_api_client')
+    def test_should_work_for_old_supplier_token_without_role(self, data_api_client):
+        data_api_client.get_user.return_value = None
+        token = generate_token(
+            {
+                "supplier_id": '12345',
+                "supplier_name": 'Supplier Name',
+                "email_address": 'test@example.com'
+            },
+            self.app.config['SHARED_EMAIL_KEY'],
+            self.app.config['INVITE_EMAIL_SALT']
+        )
+
+        res = self.client.get(
+            '/user/create/{}'.format(token)
+        )
+        assert res.status_code == 200
+
+        for message in [
+            'Create contributor account',
+            'Create contributor account',
+            "test@example.com",
+            '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
+                % urllib.parse.quote(token)
+        ]:
+            assert message in res.get_data(as_text=True)
+
+    def test_should_render_correct_error_page_for_old_style_expired_buyer_token(self):
+        for role in self.user_roles:
+            with freeze_time('2016-09-28 16:00:00'):
+                token = generate_token(
+                    {"email_address": 'test@example.com'},
+                    self.app.config['SHARED_EMAIL_KEY'],
+                    self.app.config['INVITE_EMAIL_SALT']
+                )
+
+            res = self.client.get(
+                '/user/create/{}'.format(token)
+            )
+
+            assert res.status_code == 400
+
+            messages = [
+                'The link you used to create an account may have expired.',
+                'Check you’ve entered the correct link or <a href="/buyers/create">send a new one</a>'
+            ]
+
+            for message in messages:
+                assert message in res.get_data(as_text=True)
+
+    def test_should_render_correct_error_page_for_old_style_expired_supplier_token(self):
+        for role in self.user_roles:
+            with freeze_time('2016-09-28 16:00:00'):
+                token = generate_token(
+                    {
+                        "supplier_id": '12345',
+                        "supplier_name": 'Supplier Name',
+                        "email_address": 'test@example.com'
+                    },
+                    self.app.config['SHARED_EMAIL_KEY'],
+                    self.app.config['INVITE_EMAIL_SALT']
+                )
+
+            res = self.client.get(
+                '/user/create/{}'.format(token)
+            )
+
+            assert res.status_code == 400
+
+            messages = [
+                'The link you used to create an account may have expired.',
+                'Check you’ve entered the correct link or ask the person who invited you to send a new invitation.'
+            ]
+
+            for message in messages:
+                assert message in res.get_data(as_text=True)
 
 
 class TestSubmitCreateUser(BaseApplicationTest):
