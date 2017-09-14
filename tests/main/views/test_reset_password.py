@@ -4,7 +4,7 @@ from lxml import html, cssselect
 from dmutils.email import generate_token
 from dmutils.email.exceptions import EmailError
 
-from ...helpers import BaseApplicationTest
+from ...helpers import BaseApplicationTest, MockMatcher
 
 from app.main.views import reset_password
 
@@ -56,7 +56,7 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 400
         assert self.strip_all_whitespace(EMAIL_INVALID_ERROR) in content
 
-    @mock.patch('app.main.views.reset_password.send_email')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_redirect_to_same_page_on_success(self, send_email):
         res = self.client.post("/user/reset-password", data={
             'email_address': 'email@email.com'
@@ -64,7 +64,7 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/reset-password'
 
-    @mock.patch('app.main.views.reset_password.send_email')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_show_email_sent_message_on_success(self, send_email):
         res = self.client.post("/user/reset-password", data={
             'email_address': 'email@email.com'
@@ -73,7 +73,7 @@ class TestResetPassword(BaseApplicationTest):
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert self.strip_all_whitespace(reset_password.EMAIL_SENT_MESSAGE) in content
 
-    @mock.patch('app.main.views.reset_password.send_email')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_should_strip_whitespace_surrounding_reset_password_email_address_field(self, send_email):
         self.client.post("/user/reset-password", data={
             'email_address': ' email@email.com'
@@ -234,17 +234,9 @@ class TestResetPassword(BaseApplicationTest):
             assert len(error_elements) == 1
             assert reset_password.EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE in error_elements[0].text_content()
 
-    @mock.patch('app.main.views.reset_password.send_email')
-    def test_should_call_send_email_with_correct_params(
-            self, send_email
-    ):
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    def test_should_call_send_email_with_correct_params(self, send_email):
         with self.app.app_context():
-
-            self.app.config['DM_MANDRILL_API_KEY'] = "API KEY"
-            self.app.config['RESET_PASSWORD_EMAIL_SUBJECT'] = "SUBJECT"
-            self.app.config['RESET_PASSWORD_EMAIL_FROM'] = "EMAIL FROM"
-            self.app.config['RESET_PASSWORD_EMAIL_NAME'] = "EMAIL NAME"
-
             res = self.client.post(
                 '/user/reset-password',
                 data={'email_address': 'email@email.com'}
@@ -253,15 +245,14 @@ class TestResetPassword(BaseApplicationTest):
             assert res.status_code == 302
             send_email.assert_called_once_with(
                 "email@email.com",
-                mock.ANY,
-                "API KEY",
-                "SUBJECT",
-                "EMAIL FROM",
-                "EMAIL NAME",
-                ["password-resets"]
+                template_id='7501026e-d0ba-4cd1-b64f-6a19e1f0913f',
+                personalisation={
+                    'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
+                },
+                reference='reset-password-8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50='
             )
 
-    @mock.patch('app.main.views.reset_password.send_email')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_should_be_an_error_if_send_email_fails(
             self, send_email
     ):

@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import six
-
 from flask import abort, current_app, flash, redirect, render_template, url_for, Markup
 
 from dmutils.user import User
-from dmutils.email import generate_token, decode_password_reset_token, send_email
-from dmutils.email.exceptions import EmailError
+from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
+from dmutils.email.helpers import hash_string
 
 from .. import main
 from ..forms.auth_forms import EmailAddressForm, ChangePasswordForm
-from ..helpers import hash_email
 from ... import data_api_client
+
 
 EMAIL_SENT_MESSAGE = Markup(
     """If the email address you've entered belongs to a Digital Marketplace account,
@@ -54,41 +52,43 @@ def send_reset_password_email():
                 current_app.config['RESET_PASSWORD_SALT']
             )
 
-            url = url_for('main.reset_password', token=token, _external=True)
-
-            email_body = render_template(
-                "emails/reset_password_email.html",
-                url=url,
-                locked=user.locked)
+            notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
 
             try:
-                send_email(
+                notify_client.send_email(
                     user.email_address,
-                    email_body,
-                    current_app.config['DM_MANDRILL_API_KEY'],
-                    current_app.config['RESET_PASSWORD_EMAIL_SUBJECT'],
-                    current_app.config['RESET_PASSWORD_EMAIL_FROM'],
-                    current_app.config['RESET_PASSWORD_EMAIL_NAME'],
-                    ["password-resets"]
+                    template_id=current_app.config['NOTIFY_TEMPLATES']['reset_password'],
+                    personalisation={
+                        'url': url_for('main.reset_password', token=token, _external=True),
+                    },
+                    reference='reset-password-{}'.format(hash_string(user.email_address))
                 )
             except EmailError as e:
                 current_app.logger.error(
-                    "Password reset email failed to send. "
-                    "error {error} email_hash {email_hash}",
-                    extra={'error': six.text_type(e),
-                           'email_hash': hash_email(user.email_address)})
+                    "{code}: Password reset email for email_hash {email_hash} failed to send. Error: {error}",
+                    extra={
+                        'email_hash': hash_string(user.email_address),
+                        'error': str(e),
+                        'code': 'login.reset-email.notify-error'
+                    }
+                )
                 abort(503, response="Failed to send password reset.")
 
             current_app.logger.info(
-                "login.reset-email.sent: Sending password reset email for "
-                "supplier_id {supplier_id} email_hash {email_hash}",
-                extra={'supplier_id': user.supplier_id,
-                       'email_hash': hash_email(user.email_address)})
+                "{code}: Sending password reset email for email_hash {email_hash}",
+                extra={
+                    'email_hash': hash_string(user.email_address),
+                    'code': 'login.reset-email.sent'
+                }
+            )
         else:
             current_app.logger.info(
-                "login.reset-email.invalid-email: "
-                "Password reset request for invalid supplier email {email_hash}",
-                extra={'email_hash': hash_email(email_address)})
+                "{code}: Password reset request for invalid email_hash {email_hash}",
+                extra={
+                    'email_hash': hash_string(email_address),
+                    'code': 'login.reset-email.invalid-email'
+                }
+            )
 
         flash(EMAIL_SENT_MESSAGE)
         return redirect(url_for('.request_password_reset'))
