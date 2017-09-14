@@ -72,6 +72,24 @@ class TestLogin(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/admin'
 
+    def test_should_redirect_to_dashboard_if_next_url_is_unsafe(self):
+        self.login_as_supplier()
+        res = self.client.get("/user/login?next=//example.com")
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/suppliers'
+
+    def test_should_redirect_to_dashboard_if_next_url_is_not_http(self):
+        self.login_as_admin()
+        res = self.client.get("/user/login?next=file:example.pdf")
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/admin'
+
+    def test_should_redirect_to_next_url_for_simple_auth_uri(self):
+        self.login_as_supplier()
+        res = self.client.get("/user/login?next=@example.com")
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/@example.com'
+
     def test_should_redirect_logged_in_admin_to_next_url_if_admin_app(self):
         self.login_as_admin()
         res = self.client.get("/user/login?next=/admin/foo-bar")
@@ -83,12 +101,6 @@ class TestLogin(BaseApplicationTest):
         res = self.client.get("/user/login?next=/suppliers/foo-bar")
         assert res.status_code == 302
         assert res.location == 'http://localhost/suppliers/foo-bar'
-
-    def test_should_redirect_to_supplier_dashboard_if_next_url_not_supplier_app(self):
-        self.login_as_supplier()
-        res = self.client.get("/user/login?next=/foo-bar")
-        assert res.status_code == 302
-        assert res.location == 'http://localhost/suppliers'
 
     def test_should_strip_whitespace_surrounding_login_email_address_field(self):
         self.client.post("/user/login", data={

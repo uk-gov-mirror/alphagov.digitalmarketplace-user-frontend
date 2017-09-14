@@ -579,6 +579,14 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_create_buyer_user_if_no_phone_number(self, data_api_client):
+        data_api_client.create_user.return_value = {
+            "users": {
+                "id": "1234",
+                "emailAddress": "test@email.com",
+                "name": "valid name",
+                "role": "buyer",
+            }
+        }
 
         token = self._generate_token(role='buyer')
         res = self.client.post(
@@ -618,6 +626,14 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_strip_whitespace_surrounding_create_user_name_field(self, data_api_client):
+        data_api_client.create_user.return_value = {
+            "users": {
+                "id": "1234",
+                "emailAddress": "test@email.com",
+                "name": "valid name",
+                "role": "buyer",
+            }
+        }
         data_api_client.get_user.return_value = None
         token = self._generate_token(role='buyer')
         self.client.post(
@@ -639,7 +655,14 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_not_strip_whitespace_surrounding_create_user_password_field(self, data_api_client):
-        data_api_client.get_user.return_value = None
+        data_api_client.create_user.return_value = {
+            "users": {
+                "id": "1234",
+                "emailAddress": "test@email.com",
+                "name": "valid name",
+                "role": "buyer",
+            }
+        }
         token = self._generate_token(role='buyer')
         self.client.post(
             '/user/create/{}'.format(token),
