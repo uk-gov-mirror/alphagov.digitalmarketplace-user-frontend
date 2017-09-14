@@ -23,13 +23,13 @@ class Config(object):
 
     DM_DATA_API_URL = None
     DM_DATA_API_AUTH_TOKEN = None
-    DM_MANDRILL_API_KEY = None
+    DM_NOTIFY_API_KEY = None
+
+    NOTIFY_TEMPLATES = {
+        'reset_password': '7501026e-d0ba-4cd1-b64f-6a19e1f0913f',
+    }
 
     DEBUG = False
-
-    RESET_PASSWORD_EMAIL_NAME = 'Digital Marketplace Admin'
-    RESET_PASSWORD_EMAIL_FROM = 'enquiries@digitalmarketplace.service.gov.uk'
-    RESET_PASSWORD_EMAIL_SUBJECT = 'Reset your Digital Marketplace password'
 
     SECRET_KEY = None
     SHARED_EMAIL_KEY = None
@@ -72,7 +72,7 @@ class Test(Config):
     DM_DATA_API_URL = "http://wrong.completely.invalid:5000"
     DM_DATA_API_AUTH_TOKEN = "myToken"
 
-    DM_MANDRILL_API_KEY = 'MANDRILL'
+    DM_NOTIFY_API_KEY = "not_a_real_key-00000000-fake-uuid-0000-000000000000"
     SHARED_EMAIL_KEY = "KEY"
     SECRET_KEY = "KEY"
 
@@ -85,7 +85,7 @@ class Development(Config):
     DM_DATA_API_URL = "http://localhost:5000"
     DM_DATA_API_AUTH_TOKEN = "myToken"
 
-    DM_MANDRILL_API_KEY = "not_a_real_key"
+    DM_NOTIFY_API_KEY = "not_a_real_key-00000000-fake-uuid-0000-000000000000"
     SECRET_KEY = "verySecretKey"
     SHARED_EMAIL_KEY = "very_secret"
 
@@ -102,11 +102,17 @@ class Preview(Live):
 
 
 class Staging(Live):
-    pass
+    NOTIFY_TEMPLATES = {
+        'reset_password': '4ae02cdd-65fd-417f-8c24-61260229f9af',
+    }
+
+    # Check we didn't forget any live template IDs
+    assert NOTIFY_TEMPLATES.keys() == Config.NOTIFY_TEMPLATES.keys()
 
 
 class Production(Live):
-    pass
+    NOTIFY_TEMPLATES = Staging.NOTIFY_TEMPLATES
+
 
 configs = {
     'development': Development,
