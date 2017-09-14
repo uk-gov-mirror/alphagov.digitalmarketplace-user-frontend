@@ -84,6 +84,12 @@ class TestLogin(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/admin'
 
+    def test_should_redirect_to_next_url_for_simple_auth_uri(self):
+        self.login_as_supplier()
+        res = self.client.get("/user/login?next=@example.com")
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/@example.com'
+
     def test_should_redirect_logged_in_admin_to_next_url_if_admin_app(self):
         self.login_as_admin()
         res = self.client.get("/user/login?next=/admin/foo-bar")
