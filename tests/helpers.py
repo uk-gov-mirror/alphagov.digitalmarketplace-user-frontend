@@ -243,3 +243,12 @@ class BaseApplicationTest(object):
                 raise AssertionError('nothing flashed')
             assert expected_message in message
             assert expected_category == category
+
+
+class MockMatcher(object):
+    """A helper object that compares based on the function return value."""
+    def __init__(self, fn):
+        self.fn = fn
+
+    def __eq__(self, other):
+        return self.fn(other)
