@@ -13,8 +13,8 @@ from ... import data_api_client
 
 
 NO_ACCOUNT_MESSAGE = Markup("""Make sure you've entered the right email address and password. Accounts
-    are locked after 5 failed attempts. If you think your account has been locked, email
-    <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>.""")
+    are locked after 5 failed attempts. If you’ve forgotten your password you can reset it by clicking
+    ‘Forgotten password’.""")
 
 
 @main.route('/login', methods=["GET"])

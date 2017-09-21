@@ -12,8 +12,9 @@ from ... import data_api_client
 
 
 EMAIL_SENT_MESSAGE = Markup(
-    """If the email address you've entered belongs to a Digital Marketplace account,
-    we'll send a link to reset the password.
+    """If the email address you've entered belongs to a Digital Marketplace account, we'll send a link to reset the
+    password. If you don’t receive this, email
+    <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>.
     """
 )
 
