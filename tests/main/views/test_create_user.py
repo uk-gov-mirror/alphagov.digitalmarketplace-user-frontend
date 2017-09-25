@@ -94,7 +94,7 @@ class TestCreateUser(BaseApplicationTest):
     def test_should_render_create_user_page_if_user_does_not_exist(self, data_api_client):
         data_api_client.get_user.return_value = None
         page_titles = ["Create a new Digital Marketplace account", "Add your name and create a password"]
-        button_values = ['Create account', 'Save and continue']
+        button_values = ['Create account'] * 2  # the same for now
 
         for role, page_title, button_value in zip(self.user_roles, page_titles, button_values):
             token = self._generate_token(role=role)
@@ -286,7 +286,7 @@ class TestCreateUser(BaseApplicationTest):
 
         for message in [
             'Add your name and create a password',
-            'Save and continue',
+            'Create account',
             "test@example.com",
             '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
                 % urllib.parse.quote(token)
