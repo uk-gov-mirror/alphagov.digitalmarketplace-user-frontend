@@ -93,8 +93,8 @@ class TestCreateUser(BaseApplicationTest):
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_render_create_user_page_if_user_does_not_exist(self, data_api_client):
         data_api_client.get_user.return_value = None
-        page_titles = ["Create a new Digital Marketplace account", "Create contributor account"]
-        button_values = ['Create account', 'Create contributor account']
+        page_titles = ["Create a new Digital Marketplace account", "Add your name and create a password"]
+        button_values = ['Create account'] * 2  # the same for now
 
         for role, page_title, button_value in zip(self.user_roles, page_titles, button_values):
             token = self._generate_token(role=role)
@@ -285,8 +285,8 @@ class TestCreateUser(BaseApplicationTest):
         assert res.status_code == 200
 
         for message in [
-            'Create contributor account',
-            'Create contributor account',
+            'Add your name and create a password',
+            'Create account',
             "test@example.com",
             '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
                 % urllib.parse.quote(token)
@@ -436,7 +436,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
     def test_should_be_an_error_if_too_long_name_and_password(self):
         page_headings = [
             "Create a new Digital Marketplace account",
-            "Create contributor account"
+            "Add your name and create a password"
         ]
         for role, page_heading in zip(self.user_roles, page_headings):
             with self.app.app_context():
