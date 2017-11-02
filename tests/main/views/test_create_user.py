@@ -243,56 +243,6 @@ class TestCreateUser(BaseApplicationTest):
         assert u"You were invited by ‘Different Supplier Name’" in res.get_data(as_text=True)
         assert u"Your account is registered with ‘Supplier Name’" in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_work_for_old_buyer_token_without_role(self, data_api_client):
-        data_api_client.get_user.return_value = None
-        token = generate_token(
-            {'email_address': 'test@example.com'},
-            self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['INVITE_EMAIL_SALT']
-        )
-
-        res = self.client.get(
-            '/user/create/{}'.format(token)
-        )
-        assert res.status_code == 200
-
-        for message in [
-            "Create a new Digital Marketplace account",
-            "Create account",
-            "test@example.com",
-            '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
-                % urllib.parse.quote(token)
-        ]:
-            assert message in res.get_data(as_text=True)
-
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_work_for_old_supplier_token_without_role(self, data_api_client):
-        data_api_client.get_user.return_value = None
-        token = generate_token(
-            {
-                "supplier_id": '12345',
-                "supplier_name": 'Supplier Name',
-                "email_address": 'test@example.com'
-            },
-            self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['INVITE_EMAIL_SALT']
-        )
-
-        res = self.client.get(
-            '/user/create/{}'.format(token)
-        )
-        assert res.status_code == 200
-
-        for message in [
-            'Add your name and create a password',
-            'Create account',
-            "test@example.com",
-            '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
-                % urllib.parse.quote(token)
-        ]:
-            assert message in res.get_data(as_text=True)
-
     def test_should_render_correct_error_page_for_old_style_expired_buyer_token(self):
         for role in self.user_roles:
             with freeze_time('2016-09-28 16:00:00'):
