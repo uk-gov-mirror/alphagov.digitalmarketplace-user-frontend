@@ -1,10 +1,6 @@
 @import "_typography.scss";
 $gutter-one-sixth: $gutter-one-third/2;
 
-#publication {
-  @include copy-19;
-}
-
 .html-publications-show {
   @extend %contain-floats;
 
@@ -373,10 +369,6 @@ $gutter-one-sixth: $gutter-one-third/2;
     margin-left: 0;
   }
 
-}
-
-.floated-children {
-  overflow: hidden;
 }
 
 .terms-and-conditions {
