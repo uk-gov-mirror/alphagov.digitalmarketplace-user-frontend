@@ -7,9 +7,6 @@
 $path: "/static/images/";
 
 // Digital Marketplace front end toolkit components
-@import "forms/word-counter";
-@import "forms/list-entry";
-
 /* Classes shared between multiple apps */
 @import "toolkit/shared_scss/_reset.scss";
 @import "toolkit/shared_scss/_lists.scss";
@@ -23,42 +20,24 @@ $path: "/static/images/";
 
 // Digital Marketplace Front-end toolkit styles
 @import "toolkit/_breadcrumb.scss";
-@import "toolkit/_browse-list.scss";
 @import "toolkit/_buttons.scss";
-@import "toolkit/_contact-details.scss";
-@import "toolkit/_document.scss";
 @import "toolkit/_grids.scss";
-@import "toolkit/_instruction-list.scss";
-@import "toolkit/_link-button.scss";
 @import "toolkit/_notification-banners.scss";
 @import "toolkit/_page-headings.scss";
 @import "toolkit/_phase-banner.scss";
 @import "toolkit/_proposition-header.scss";
 @import "toolkit/_secondary-action-link.scss";
-@import "toolkit/_service-id.scss";
-@import "toolkit/_statistics.scss";
-@import "toolkit/_temporary-message.scss";
-@import "toolkit/forms/_dates.scss";
 @import "toolkit/forms/_hint.scss";
-@import "toolkit/forms/_keyword-search.scss";
-@import "toolkit/forms/_option-select.scss";
 @import "toolkit/forms/_questions.scss";
-@import "toolkit/forms/_selection-buttons.scss";
-@import "toolkit/forms/_summary.scss";
 @import "toolkit/forms/_textboxes.scss";
 @import "toolkit/forms/_validation.scss";
-@import "toolkit/search/_search-result.scss";
 
 #wrapper {
   @extend %site-width-container;
   padding-bottom: $gutter * 2;
 }
 
-@import "toolkit/forms/_hint.scss";
-@import "toolkit/forms/_questions.scss";
-@import "toolkit/shared_scss/_dmspeak.scss";
-
-// Buyers app styles
+// User app custom styles
 @import "_footer.scss";
 @import "_text.scss";
 @import "_secondary-action-link.scss";
