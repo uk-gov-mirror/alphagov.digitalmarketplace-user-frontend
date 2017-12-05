@@ -13,6 +13,7 @@ body {
   }
 }
 
-.visual-emphasis {
-  font-weight: bold;
+.break-link {
+  display: inline-block;
+  word-break: break-all;
 }
