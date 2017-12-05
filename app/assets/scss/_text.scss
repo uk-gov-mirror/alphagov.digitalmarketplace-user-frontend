@@ -12,3 +12,8 @@ body {
     width: 66%;
   }
 }
+
+.break-link {
+  display: inline-block;
+  word-break: break-all;
+}
