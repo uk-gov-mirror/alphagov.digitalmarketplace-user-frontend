@@ -24,7 +24,7 @@ def status():
             {api['key']: api['status']},
             status="error",
             version=version,
-            message="Error connecting to the api.",
+            message="Error connecting to the (Data) API.",
             flags=get_flags(current_app)
         ), 500
 
