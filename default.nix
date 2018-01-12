@@ -13,7 +13,8 @@ in (with args; {
     shortName = "dm-user-fe";
     buildInputs = [
       pythonPackages.virtualenv
-      pkgs.nodejs
+      pkgs.nodejs-6_x
+      pkgs.yarn
       pkgs.libffi
       pkgs.libyaml
       # pip requires git to fetch some of its dependencies
