@@ -13,6 +13,11 @@ def suppliers_list_by_prefix():
     raise NotImplementedError()
 
 
+@external.route('/help')
+def help():
+    raise NotImplementedError()
+
+
 @external.route('/')
 def index():
     raise NotImplementedError()
