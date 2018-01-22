@@ -5,6 +5,7 @@ from flask_wtf.csrf import CsrfProtect
 import dmapiclient
 from dmutils import init_app, flask_featureflags
 from dmutils.user import User
+from dmutils.external import external as external_blueprint
 
 from config import configs
 
@@ -29,7 +30,6 @@ def create_app(config_name):
     )
 
     from .main import main as main_blueprint
-    from .external.views.external import external as external_blueprint
 
     application.register_blueprint(main_blueprint, url_prefix='/user')
     application.register_blueprint(external_blueprint)
