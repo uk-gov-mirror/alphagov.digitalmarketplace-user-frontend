@@ -84,7 +84,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -96,7 +96,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -112,7 +112,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -127,7 +127,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -144,7 +144,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -159,7 +159,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -178,7 +178,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -197,7 +197,7 @@ class TestResetPassword(BaseApplicationTest):
         with self.app.app_context():
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 
@@ -218,7 +218,7 @@ class TestResetPassword(BaseApplicationTest):
             )
             token = generate_token(
                 self._user,
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
             url = '/user/reset-password/{}'.format(token)
 

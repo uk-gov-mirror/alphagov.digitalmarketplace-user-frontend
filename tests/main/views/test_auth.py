@@ -256,7 +256,7 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
                     "user": 123,
                     "email": 'email@email.com',
                 },
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
 
             url = '/user/reset-password/{}'.format(token)

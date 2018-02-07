@@ -49,7 +49,7 @@ def send_reset_password_email():
                 {
                     "user": user.id
                 },
-                current_app.config['SECRET_KEY'],
+                current_app.config['SHARED_EMAIL_KEY'],
                 current_app.config['RESET_PASSWORD_SALT']
             )
 
