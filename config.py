@@ -74,7 +74,7 @@ class Test(Config):
 
     DM_NOTIFY_API_KEY = "not_a_real_key-00000000-fake-uuid-0000-000000000000"
     SHARED_EMAIL_KEY = "KEY"
-    SECRET_KEY = "KEY"
+    SECRET_KEY = "KEY2"
 
 
 class Development(Config):

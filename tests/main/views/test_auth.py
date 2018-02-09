@@ -167,10 +167,13 @@ class TestLogin(BaseApplicationTest):
                 'email_address': 'valid@email.com',
                 'password': '1234567890'
             })
+
+            properties = ['Secure', 'HttpOnly', 'Domain=127.0.0.1', 'Path=/']
+            for prop in properties:
+                assert prop in res.headers['Set-Cookie']
+
             cookie_value = self.get_cookie_by_name(res, 'dm_session')
             assert cookie_value['dm_session'] is not None
-            assert cookie_value['Secure; HttpOnly; Path'] == '/'
-            assert cookie_value["Domain"] == "127.0.0.1"
 
     def test_should_redirect_to_login_on_logout(self):
         res = self.client.post('/user/logout')
@@ -256,7 +259,7 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
                     "user": 123,
                     "email": 'email@email.com',
                 },
-                self.app.config['SECRET_KEY'],
+                self.app.config['SHARED_EMAIL_KEY'],
                 self.app.config['RESET_PASSWORD_SALT'])
 
             url = '/user/reset-password/{}'.format(token)
