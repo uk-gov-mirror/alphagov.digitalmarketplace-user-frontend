@@ -1,6 +1,16 @@
 # coding: utf-8
 from flask_login import current_user
-from flask import current_app, flash, redirect, render_template, request, url_for, get_flashed_messages, Markup
+from flask import (
+    current_app,
+    flash,
+    get_flashed_messages,
+    Markup,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for
+)
 from flask_login import logout_user, login_user
 
 from dmutils.user import User
@@ -62,5 +72,6 @@ def process_login():
 
 @main.route('/logout', methods=["POST"])
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for('.render_login'))
