@@ -180,6 +180,16 @@ class TestLogin(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
 
+    def test_should_expire_session_vars_on_logout(self):
+        self.login_as_supplier()
+        with self.client.session_transaction() as session:
+            session['company_name'] = "Acme Corp"
+
+        self.client.post('/user/logout')
+
+        with self.client.session_transaction() as session:
+            assert session.get('company_name') is None
+
     @mock.patch('app.main.views.auth.data_api_client')
     def test_should_return_a_403_for_invalid_login(self, data_api_client):
         data_api_client.authenticate_user.return_value = None
