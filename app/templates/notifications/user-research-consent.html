@@ -1,0 +1,89 @@
+{% extends "_base_page.html" %}
+
+{% block page_title %}User reserch notification – Digital Marketplace{% endblock %}
+
+{% block breadcrumb %}
+  {%
+    with items = [
+      {
+        "link": "/",
+        "label": "Digital Marketplace"
+      },
+      {
+        "link": dashboard_url,
+        "label": "Your account"
+      }
+    ]
+  %}
+    {% include "toolkit/breadcrumb.html" %}
+  {% endwith %}
+{% endblock %}
+
+{% block main_content %}
+
+<div class="grid-row notification-user-research">
+
+  <div class="column-two-thirds">
+    {% with heading = "{}".format(
+        "Join the user research mailing list" 
+          if not userResearchOptIn
+          else "Unsubscribe from the user research mailing list"
+        ) %}
+      {% include "toolkit/page-heading.html" %}
+    {% endwith %}
+
+    {% if not userResearchOptIn %}
+      <p class="text">
+        Help us improve the Digital Marketplace by taking part in user research.
+      </p>
+      <p class="text">
+        You don’t have to take part just because you’ve signed up and you can unsubscribe at any time.
+      </p>
+    {% else %}
+      <p class="text">
+         You can join again at any time.
+      </p>
+    {% endif %}
+
+    <form action="{{ url_for('main.user_research_consent') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      {%
+        with
+        type = "checkbox",
+        name = "user_research_opt_in",
+        value = [userResearchOptIn],
+        options = [
+          { 
+            "label": "Send me emails about opportunities to get involved in user research",
+            "value": True,
+          }
+        ]
+      %}
+        {% include "toolkit/forms/selection-buttons.html" %}
+      {% endwith %}
+
+      {% with 
+        label="Save changes", 
+        type="save", 
+        name="save_changes",
+        analytics = "tracking",
+        analytics_category = "user_research",
+        analytics_action = "subscribe" if not userResearchOptIn else "unsubscribe"
+      %}
+        {% include "toolkit/button.html" %}
+      {% endwith %}
+    </form>
+
+    {%
+      with
+      url = dashboard_url,
+      text = "Return to your account"
+    %}
+      {% include "toolkit/secondary-action-link.html" %}
+    {% endwith %}
+  </div>
+
+</div>
+
+
+{% endblock %}
