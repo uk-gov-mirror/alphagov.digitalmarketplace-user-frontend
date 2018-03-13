@@ -70,7 +70,7 @@ To run the whole testsuite:
 make test
 ```
 
-To only run the JavaScript tests:
+To only run the JavaScript tests (none in this app as of March 2018):
 
 ```
 make test-javascript
