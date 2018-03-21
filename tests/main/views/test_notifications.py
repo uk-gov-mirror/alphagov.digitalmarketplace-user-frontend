@@ -53,3 +53,21 @@ class TestUserResearchNotifications(BaseApplicationTest):
         res = self.client.get("/user/notifications/user-research")
         assert res.status_code == 200
         assert "Unsubscribe from the user research mailing list" in res.get_data(as_text=True)
+
+    @mock.patch('app.main.views.notifications.data_api_client', autospec=True)
+    def test_user_research_opt_in(self, data_api_client):
+        self.login_as_buyer()
+        self.client.post("/user/notifications/user-research", data={"user_research_opt_in": "True"})
+        self.assert_flashes('Your preference has been saved', expected_category='success')
+        assert data_api_client.update_user.call_args_list == [
+            mock.call(123, updater='buyer@email.com', user_research_opted_in=True)
+        ]
+
+    @mock.patch('app.main.views.notifications.data_api_client', autospec=True)
+    def test_user_research_opt_out(self, data_api_client):
+        self.login_as_buyer()
+        self.client.post("/user/notifications/user-research", data={})
+        self.assert_flashes('Your preference has been saved', expected_category='success')
+        assert data_api_client.update_user.call_args_list == [
+            mock.call(123, updater='buyer@email.com', user_research_opted_in=False)
+        ]
