@@ -442,7 +442,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
         assert res.status_code == 302
         assert res.location == 'http://localhost/'
-        self.assert_flashes('account-created', 'flag')
+        self.assert_flashes('/?account-created=true', 'track-page-view')
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_create_suplier_user_if_user_does_not_exist(self, data_api_client):
@@ -478,7 +478,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
         assert res.status_code == 302
         assert res.location == 'http://localhost/suppliers'
-        self.assert_flashes('account-created', 'flag')
+        self.assert_flashes('/suppliers?account-created=true', 'track-page-view')
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_return_an_error_if_buyer_user_exists(self, data_api_client):
