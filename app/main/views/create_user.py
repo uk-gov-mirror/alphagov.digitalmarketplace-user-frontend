@@ -1,4 +1,4 @@
-from flask import abort, current_app, flash, render_template, Markup
+from flask import abort, current_app, render_template, Markup
 from flask_login import login_user
 
 from dmapiclient import HTTPError
@@ -132,5 +132,4 @@ def submit_create_user(encoded_token):
         else:
             raise
 
-    flash('account-created', 'flag')
-    return redirect_logged_in_user()
+    return redirect_logged_in_user(account_created=True)
