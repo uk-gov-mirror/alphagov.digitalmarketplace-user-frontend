@@ -105,6 +105,7 @@ class Staging(Live):
     NOTIFY_TEMPLATES = {
         'reset_password': '4ae02cdd-65fd-417f-8c24-61260229f9af',
     }
+    WTF_CSRF_ENABLED = False
 
     # Check we didn't forget any live template IDs
     assert NOTIFY_TEMPLATES.keys() == Config.NOTIFY_TEMPLATES.keys()
