@@ -389,26 +389,25 @@ class TestSubmitCreateUser(BaseApplicationTest):
             "Add your name and create a password"
         ]
         for role, page_heading in zip(self.user_roles, page_headings):
-            with self.app.app_context():
-                token = self._generate_token(role=role)
-                twofiftysix = "a" * 256
-                fiftyone = "a" * 51
+            token = self._generate_token(role=role)
+            twofiftysix = "a" * 256
+            fiftyone = "a" * 51
 
-                res = self.client.post(
-                    '/user/create/{}'.format(token),
-                    data={
-                        'password': fiftyone,
-                        'name': twofiftysix
-                    }
-                )
-                assert res.status_code == 400
-                for message in [
-                    page_heading,
-                    "Names must be between 1 and 255 characters",
-                    "Passwords must be between 10 and 50 characters",
-                    "test@email.com"
-                ]:
-                    assert message in res.get_data(as_text=True)
+            res = self.client.post(
+                '/user/create/{}'.format(token),
+                data={
+                    'password': fiftyone,
+                    'name': twofiftysix
+                }
+            )
+            assert res.status_code == 400
+            for message in [
+                page_heading,
+                "Names must be between 1 and 255 characters",
+                "Passwords must be between 10 and 50 characters",
+                "test@email.com"
+            ]:
+                assert message in res.get_data(as_text=True)
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_create_buyer_user_if_user_does_not_exist(self, data_api_client):
@@ -634,18 +633,17 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_be_a_503_if_api_fails(self, data_api_client):
-        with self.app.app_context():
-            data_api_client.create_user.side_effect = HTTPError("bad email")
+        data_api_client.create_user.side_effect = HTTPError("bad email")
 
-            token = self._generate_token(role='buyer')
-            res = self.client.post(
-                '/user/create/{}'.format(token),
-                data={
-                    'password': 'validpassword',
-                    'name': 'valid name'
-                }
-            )
-            assert res.status_code == 503
+        token = self._generate_token(role='buyer')
+        res = self.client.post(
+            '/user/create/{}'.format(token),
+            data={
+                'password': 'validpassword',
+                'name': 'valid name'
+            }
+        )
+        assert res.status_code == 503
 
     @mock.patch('app.main.views.create_user.data_api_client')
     def test_should_render_error_page_if_invalid_buyer_domain(self, data_api_client):

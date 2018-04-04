@@ -44,15 +44,14 @@ class TestLogin(BaseApplicationTest):
 
     @mock.patch('app.main.views.auth.data_api_client')
     def test_should_redirect_to_homepage_on_buyer_login(self, data_api_client):
-        with self.app.app_context():
-            data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
-            res = self.client.post("/user/login", data={
-                'email_address': 'valid@email.com',
-                'password': '1234567890'
-            })
-            assert res.status_code == 302
-            assert res.location == 'http://localhost/'
-            assert 'Secure;' in res.headers['Set-Cookie']
+        data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
+        res = self.client.post("/user/login", data={
+            'email_address': 'valid@email.com',
+            'password': '1234567890'
+        })
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/'
+        assert 'Secure;' in res.headers['Set-Cookie']
 
     def test_should_redirect_logged_in_supplier_to_supplier_dashboard(self):
         self.login_as_supplier()
@@ -128,15 +127,14 @@ class TestLogin(BaseApplicationTest):
 
     @mock.patch('app.main.views.auth.data_api_client')
     def test_ok_next_url_redirects_buyer_on_login(self, data_api_client):
-        with self.app.app_context():
-            data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
-            res = self.client.post("/user/login?next=/bar-foo",
-                                   data={
-                                       'email_address': 'valid@email.com',
-                                       'password': '1234567890'
-                                   })
-            assert res.status_code == 302
-            assert res.location == 'http://localhost/bar-foo'
+        data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
+        res = self.client.post("/user/login?next=/bar-foo",
+                               data={
+                                   'email_address': 'valid@email.com',
+                                   'password': '1234567890'
+                               })
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/bar-foo'
 
     def test_bad_next_url_takes_supplier_user_to_dashboard(self):
         res = self.client.post("/user/login?next=http://badness.com",
@@ -149,31 +147,29 @@ class TestLogin(BaseApplicationTest):
 
     @mock.patch('app.main.views.auth.data_api_client')
     def test_bad_next_url_takes_buyer_user_to_homepage(self, data_api_client):
-        with self.app.app_context():
-            data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
-            res = self.client.post("/user/login?next=http://badness.com",
-                                   data={
-                                       'email_address': 'valid@email.com',
-                                       'password': '1234567890'
-                                   })
+        data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
+        res = self.client.post("/user/login?next=http://badness.com",
+                               data={
+                                   'email_address': 'valid@email.com',
+                                   'password': '1234567890'
+                               })
         assert res.status_code == 302
         assert res.location == 'http://localhost/'
 
     def test_should_have_cookie_on_redirect(self):
-        with self.app.app_context():
-            self.app.config['SESSION_COOKIE_DOMAIN'] = '127.0.0.1'
-            self.app.config['SESSION_COOKIE_SECURE'] = True
-            res = self.client.post("/login", data={
-                'email_address': 'valid@email.com',
-                'password': '1234567890'
-            })
+        self.app.config['SESSION_COOKIE_DOMAIN'] = '127.0.0.1'
+        self.app.config['SESSION_COOKIE_SECURE'] = True
+        res = self.client.post("/login", data={
+            'email_address': 'valid@email.com',
+            'password': '1234567890'
+        })
 
-            properties = ['Secure', 'HttpOnly', 'Domain=127.0.0.1', 'Path=/']
-            for prop in properties:
-                assert prop in res.headers['Set-Cookie']
+        properties = ['Secure', 'HttpOnly', 'Domain=127.0.0.1', 'Path=/']
+        for prop in properties:
+            assert prop in res.headers['Set-Cookie']
 
-            cookie_value = self.get_cookie_by_name(res, 'dm_session')
-            assert cookie_value['dm_session'] is not None
+        cookie_value = self.get_cookie_by_name(res, 'dm_session')
+        assert cookie_value['dm_session'] is not None
 
     def test_should_redirect_to_login_on_logout(self):
         res = self.client.post('/user/logout')
@@ -262,17 +258,15 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
         data_api_client.get_user.return_value = self.user(
             123, "email@email.com", 1234, 'email', 'name'
         )
+        token = generate_token(
+            {
+                "user": 123,
+                "email": 'email@email.com',
+            },
+            self.app.config['SHARED_EMAIL_KEY'],
+            self.app.config['RESET_PASSWORD_SALT'])
 
-        with self.app.app_context():
-            token = generate_token(
-                {
-                    "user": 123,
-                    "email": 'email@email.com',
-                },
-                self.app.config['SHARED_EMAIL_KEY'],
-                self.app.config['RESET_PASSWORD_SALT'])
-
-            url = '/user/reset-password/{}'.format(token)
+        url = '/user/reset-password/{}'.format(token)
 
         self._forms_and_inputs_not_autofillable(
             url,
