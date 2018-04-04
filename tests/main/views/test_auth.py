@@ -14,19 +14,16 @@ PASSWORD_EMPTY_ERROR = "You must provide your password"
 class TestLogin(BaseApplicationTest):
 
     def setup_method(self, method):
-        super(TestLogin, self).setup_method(method)
-
-        data_api_client_config = {'authenticate_user.return_value': self.user(
-            123, "email@email.com", 1234, 'name', 'name'
-        )}
-
-        self._data_api_client = mock.patch(
-            'app.main.views.auth.data_api_client', **data_api_client_config
+        super().setup_method(method)
+        self.data_api_client_patch = mock.patch('app.main.views.auth.data_api_client', autospec=True)
+        self.data_api_client = self.data_api_client_patch.start()
+        self.data_api_client.authenticate_user.return_value = self.user(
+            123, "email@email.com", 1234, 'name', 'name'  # supplier user
         )
-        self.data_api_client_mock = self._data_api_client.start()
 
     def teardown_method(self, method):
-        self._data_api_client.stop()
+        self.data_api_client_patch.stop()
+        super().teardown_method(method)
 
     def test_should_show_login_page(self):
         res = self.client.get("/user/login")
@@ -42,9 +39,8 @@ class TestLogin(BaseApplicationTest):
         assert res.location == 'http://localhost/suppliers'
         assert 'Secure;' in res.headers['Set-Cookie']
 
-    @mock.patch('app.main.views.auth.data_api_client')
-    def test_should_redirect_to_homepage_on_buyer_login(self, data_api_client):
-        data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
+    def test_should_redirect_to_homepage_on_buyer_login(self):
+        self.data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
         res = self.client.post("/user/login", data={
             'email_address': 'valid@email.com',
             'password': '1234567890'
@@ -106,14 +102,14 @@ class TestLogin(BaseApplicationTest):
             'email_address': '  valid@email.com  ',
             'password': '1234567890'
         })
-        self.data_api_client_mock.authenticate_user.assert_called_with('valid@email.com', '1234567890')
+        self.data_api_client.authenticate_user.assert_called_with('valid@email.com', '1234567890')
 
     def test_should_not_strip_whitespace_surrounding_login_password_field(self):
         self.client.post("/user/login", data={
             'email_address': 'valid@email.com',
             'password': '  1234567890  '
         })
-        self.data_api_client_mock.authenticate_user.assert_called_with(
+        self.data_api_client.authenticate_user.assert_called_with(
             'valid@email.com', '  1234567890  ')
 
     def test_ok_next_url_redirects_supplier_on_login(self):
@@ -125,9 +121,8 @@ class TestLogin(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/suppliers/bar-foo'
 
-    @mock.patch('app.main.views.auth.data_api_client')
-    def test_ok_next_url_redirects_buyer_on_login(self, data_api_client):
-        data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
+    def test_ok_next_url_redirects_buyer_on_login(self):
+        self.data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
         res = self.client.post("/user/login?next=/bar-foo",
                                data={
                                    'email_address': 'valid@email.com',
@@ -145,9 +140,8 @@ class TestLogin(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/suppliers'
 
-    @mock.patch('app.main.views.auth.data_api_client')
-    def test_bad_next_url_takes_buyer_user_to_homepage(self, data_api_client):
-        data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
+    def test_bad_next_url_takes_buyer_user_to_homepage(self):
+        self.data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
         res = self.client.post("/user/login?next=http://badness.com",
                                data={
                                    'email_address': 'valid@email.com',
@@ -186,9 +180,8 @@ class TestLogin(BaseApplicationTest):
         with self.client.session_transaction() as session:
             assert session.get('company_name') is None
 
-    @mock.patch('app.main.views.auth.data_api_client')
-    def test_should_return_a_403_for_invalid_login(self, data_api_client):
-        data_api_client.authenticate_user.return_value = None
+    def test_should_return_a_403_for_invalid_login(self):
+        self.data_api_client.authenticate_user.return_value = None
 
         res = self.client.post("/user/login", data={
             'email_address': 'valid@email.com',
@@ -216,6 +209,16 @@ class TestLogin(BaseApplicationTest):
 
 
 class TestLoginFormsNotAutofillable(BaseApplicationTest):
+
+    def setup_method(self, method):
+        super().setup_method(method)
+        self.data_api_client_patch = mock.patch('app.main.views.auth.data_api_client', autospec=True)
+        self.data_api_client = self.data_api_client_patch.start()
+
+    def teardown_method(self, method):
+        self.data_api_client_patch.stop()
+        super().teardown_method(method)
+
     def _forms_and_inputs_not_autofillable(self, url, expected_title, expected_lede=None):
         response = self.client.get(url)
         assert response.status_code == 200
@@ -253,7 +256,7 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
             "Reset password"
         )
 
-    @mock.patch('app.main.views.auth.data_api_client')
+    @mock.patch('app.main.views.reset_password.data_api_client')
     def test_reset_password_form_and_inputs_not_autofillable(self, data_api_client):
         data_api_client.get_user.return_value = self.user(
             123, "email@email.com", 1234, 'email', 'name'
