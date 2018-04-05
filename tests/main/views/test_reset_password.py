@@ -23,7 +23,7 @@ class TestResetPassword(BaseApplicationTest):
     _user = None
 
     def setup_method(self, method):
-        super(TestResetPassword, self).setup_method(method)
+        super().setup_method(method)
 
         data_api_client_config = {'get_user.return_value': self.user(
             123, "email@email.com", 1234, 'name', 'Name'
@@ -34,13 +34,14 @@ class TestResetPassword(BaseApplicationTest):
             "email": 'email@email.com',
         }
 
-        self._data_api_client = mock.patch(
+        self.data_api_client_patch = mock.patch(
             'app.main.views.reset_password.data_api_client', **data_api_client_config
         )
-        self.data_api_client_mock = self._data_api_client.start()
+        self.data_api_client = self.data_api_client_patch.start()
 
     def teardown_method(self, method):
-        self._data_api_client.stop()
+        self.data_api_client_patch.stop()
+        super().teardown_method(method)
 
     def test_email_should_not_be_empty(self):
         res = self.client.post("/user/reset-password", data={})
@@ -78,7 +79,7 @@ class TestResetPassword(BaseApplicationTest):
         self.client.post("/user/reset-password", data={
             'email_address': ' email@email.com'
         })
-        self.data_api_client_mock.get_user.assert_called_with(email_address='email@email.com')
+        self.data_api_client.get_user.assert_called_with(email_address='email@email.com')
 
     def test_email_should_be_decoded_from_token(self):
         token = generate_token(
@@ -168,7 +169,7 @@ class TestResetPassword(BaseApplicationTest):
         assert reset_password.PASSWORD_UPDATED_MESSAGE in res.get_data(as_text=True)
 
     def test_password_change_unknown_failure(self):
-        self.data_api_client_mock.update_user_password.return_value = False
+        self.data_api_client.update_user_password.return_value = False
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
@@ -184,7 +185,7 @@ class TestResetPassword(BaseApplicationTest):
         res = self.client.get(res.location)
 
         assert reset_password.PASSWORD_NOT_UPDATED_MESSAGE in res.get_data(as_text=True)
-        self.data_api_client_mock.update_user_password.return_value = True
+        self.data_api_client.update_user_password.return_value = True
 
     def test_should_not_strip_whitespace_surrounding_reset_password_password_field(self):
         token = generate_token(
@@ -197,12 +198,11 @@ class TestResetPassword(BaseApplicationTest):
             'password': '  1234567890',
             'confirm_password': '  1234567890'
         })
-        self.data_api_client_mock.update_user_password.assert_called_with(
+        self.data_api_client.update_user_password.assert_called_with(
             self._user.get('user'), '  1234567890', self._user.get('email'))
 
-    @mock.patch('app.main.views.reset_password.data_api_client')
-    def test_token_created_before_last_updated_password_cannot_be_used(self, data_api_client):
-        data_api_client.get_user.return_value = self.user(
+    def test_token_created_before_last_updated_password_cannot_be_used(self):
+        self.data_api_client.get_user.return_value = self.user(
             123, "email@email.com", 1234, 'email', 'Name', is_token_valid=False
         )
         token = generate_token(
