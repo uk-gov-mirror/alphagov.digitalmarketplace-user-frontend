@@ -14,6 +14,15 @@ from app.main.views.create_user import INVALID_TOKEN_MESSAGE
 
 class TestCreateUser(BaseApplicationTest):
 
+    def setup_method(self, method):
+        super().setup_method(method)
+        self.data_api_client_patch = mock.patch('app.main.views.create_user.data_api_client', autospec=True)
+        self.data_api_client = self.data_api_client_patch.start()
+
+    def teardown_method(self, method):
+        self.data_api_client_patch.stop()
+        super().teardown_method(method)
+
     user_roles = ['buyer', 'supplier']
 
     def _generate_token(self, email_address='test@email.com', role='buyer',
@@ -58,8 +67,7 @@ class TestCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             assert INVALID_TOKEN_MESSAGE in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_invalid_token_contents_500s(self, data_api_client):
+    def test_invalid_token_contents_500s(self):
         token = generate_token(
             {
                 'this_is_not_expected': 1234
@@ -90,9 +98,8 @@ class TestCreateUser(BaseApplicationTest):
             assert 'The link you used to create an account may have expired.' in res.get_data(as_text=True)
             assert message in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_render_create_user_page_if_user_does_not_exist(self, data_api_client):
-        data_api_client.get_user.return_value = None
+    def test_should_render_create_user_page_if_user_does_not_exist(self):
+        self.data_api_client.get_user.return_value = None
         page_titles = ["Create a new Digital Marketplace account", "Add your name and create a password"]
         button_values = ['Create account'] * 2  # the same for now
 
@@ -112,14 +119,13 @@ class TestCreateUser(BaseApplicationTest):
             ]:
                 assert message in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_render_an_error_if_already_registered_as_a_buyer(self, data_api_client):
+    def test_should_render_an_error_if_already_registered_as_a_buyer(self):
         error_messages = [
             'Account already exists',
             'The details you provided are registered with another supplier.'
         ]
         for role, error_message in zip(self.user_roles, error_messages):
-            data_api_client.get_user.return_value = self.user(
+            self.data_api_client.get_user.return_value = self.user(
                 123,
                 'test@email.com',
                 1 if role == 'supplier' else None,
@@ -136,14 +142,13 @@ class TestCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             assert error_message in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_if_already_registered_as_a_supplier(self, data_api_client):
+    def test_should_return_an_error_if_already_registered_as_a_supplier(self):
         page_headings = [
             'Your email address is already registered as an account with ‘Supplier’.',
             'The details you provided are registered with another supplier.'
         ]
         for role, heading in zip(self.user_roles, page_headings):
-            data_api_client.get_user.return_value = self.user(
+            self.data_api_client.get_user.return_value = self.user(
                 999,
                 'test@email.com',
                 1234,
@@ -158,10 +163,9 @@ class TestCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             assert heading in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_if_already_registered_as_an_admin(self, data_api_client):
+    def test_should_return_an_error_if_already_registered_as_an_admin(self):
         for role in self.user_roles:
-            data_api_client.get_user.return_value = self.user(
+            self.data_api_client.get_user.return_value = self.user(
                 123,
                 'test@email.com',
                 None,
@@ -178,10 +182,9 @@ class TestCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             assert "Account already exists" in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_with_locked_message_if_user_is_locked(self, data_api_client):
+    def test_should_return_an_error_with_locked_message_if_user_is_locked(self):
         for role in self.user_roles:
-            data_api_client.get_user.return_value = self.user(
+            self.data_api_client.get_user.return_value = self.user(
                 123,
                 'test@email.com',
                 1 if role == 'supplier' else None,
@@ -198,10 +201,9 @@ class TestCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             assert "Your account has been locked" in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_with_inactive_message_if_user_is_not_active(self, data_api_client):
+    def test_should_return_an_error_with_inactive_message_if_user_is_not_active(self):
         for role in self.user_roles:
-            data_api_client.get_user.return_value = self.user(
+            self.data_api_client.get_user.return_value = self.user(
                 123,
                 'test@email.com',
                 1 if role == 'supplier' else None,
@@ -218,9 +220,8 @@ class TestCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             assert "Your account has been deactivated" in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_with_wrong_supplier_message_if_invited_by_wrong_supplier(self, data_api_client):  # noqa
-        data_api_client.get_user.return_value = self.user(
+    def test_should_return_an_error_with_wrong_supplier_message_if_invited_by_wrong_supplier(self):
+        self.data_api_client.get_user.return_value = self.user(
             123,
             'test@email.com',
             1234,
@@ -297,6 +298,15 @@ class TestCreateUser(BaseApplicationTest):
 class TestSubmitCreateUser(BaseApplicationTest):
 
     user_roles = ['buyer', 'supplier']
+
+    def setup_method(self, method):
+        super().setup_method(method)
+        self.data_api_client_patch = mock.patch('app.main.views.create_user.data_api_client', autospec=True)
+        self.data_api_client = self.data_api_client_patch.start()
+
+    def teardown_method(self, method):
+        self.data_api_client_patch.stop()
+        super().teardown_method(method)
 
     def _generate_token(self, email_address='test@email.com', role='buyer'):
         token_data = {
@@ -389,30 +399,28 @@ class TestSubmitCreateUser(BaseApplicationTest):
             "Add your name and create a password"
         ]
         for role, page_heading in zip(self.user_roles, page_headings):
-            with self.app.app_context():
-                token = self._generate_token(role=role)
-                twofiftysix = "a" * 256
-                fiftyone = "a" * 51
+            token = self._generate_token(role=role)
+            twofiftysix = "a" * 256
+            fiftyone = "a" * 51
 
-                res = self.client.post(
-                    '/user/create/{}'.format(token),
-                    data={
-                        'password': fiftyone,
-                        'name': twofiftysix
-                    }
-                )
-                assert res.status_code == 400
-                for message in [
-                    page_heading,
-                    "Names must be between 1 and 255 characters",
-                    "Passwords must be between 10 and 50 characters",
-                    "test@email.com"
-                ]:
-                    assert message in res.get_data(as_text=True)
+            res = self.client.post(
+                '/user/create/{}'.format(token),
+                data={
+                    'password': fiftyone,
+                    'name': twofiftysix
+                }
+            )
+            assert res.status_code == 400
+            for message in [
+                page_heading,
+                "Names must be between 1 and 255 characters",
+                "Passwords must be between 10 and 50 characters",
+                "test@email.com"
+            ]:
+                assert message in res.get_data(as_text=True)
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_create_buyer_user_if_user_does_not_exist(self, data_api_client):
-        data_api_client.create_user.return_value = {
+    def test_should_create_buyer_user_if_user_does_not_exist(self):
+        self.data_api_client.create_user.return_value = {
             "users": {
                 "id": "1234",
                 "emailAddress": "test@email.com",
@@ -420,7 +428,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
                 "role": "buyer"
             }
         }
-        data_api_client.get_user.return_value = None
+        self.data_api_client.get_user.return_value = None
 
         token = self._generate_token(role='buyer')
         res = self.client.post(
@@ -432,7 +440,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'buyer',
             'password': 'validpassword',
             'emailAddress': 'test@email.com',
@@ -444,9 +452,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
         assert res.location == 'http://localhost/'
         self.assert_flashes('/?account-created=true', 'track-page-view')
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_create_suplier_user_if_user_does_not_exist(self, data_api_client):
-        data_api_client.create_user.return_value = {
+    def test_should_create_suplier_user_if_user_does_not_exist(self):
+        self.data_api_client.create_user.return_value = {
             "users": {
                 "id": "1234",
                 "emailAddress": "test@email.com",
@@ -468,7 +475,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'supplier',
             'password': 'validpassword',
             'emailAddress': 'test@email.com',
@@ -480,9 +487,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
         assert res.location == 'http://localhost/suppliers'
         self.assert_flashes('/suppliers?account-created=true', 'track-page-view')
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_if_buyer_user_exists(self, data_api_client):
-        data_api_client.create_user.side_effect = HTTPError(mock.Mock(status_code=409))
+    def test_should_return_an_error_if_buyer_user_exists(self):
+        self.data_api_client.create_user.side_effect = HTTPError(mock.Mock(status_code=409))
 
         token = self._generate_token(role='buyer')
         res = self.client.post(
@@ -494,7 +500,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'buyer',
             'password': 'validpassword',
             'emailAddress': 'test@email.com',
@@ -504,9 +510,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
         assert res.status_code == 400
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_if_supplier_user_exists(self, data_api_client):
-        data_api_client.create_user.side_effect = HTTPError(mock.Mock(status_code=409))
+    def test_should_return_an_error_if_supplier_user_exists(self):
+        self.data_api_client.create_user.side_effect = HTTPError(mock.Mock(status_code=409))
 
         token = self._generate_token(role='supplier')
         res = self.client.post(
@@ -517,7 +522,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'supplier',
             'password': 'validpassword',
             'emailAddress': 'test@email.com',
@@ -527,9 +532,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
         assert res.status_code == 400
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_create_buyer_user_if_no_phone_number(self, data_api_client):
-        data_api_client.create_user.return_value = {
+    def test_should_create_buyer_user_if_no_phone_number(self):
+        self.data_api_client.create_user.return_value = {
             "users": {
                 "id": "1234",
                 "emailAddress": "test@email.com",
@@ -548,7 +552,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'buyer',
             'password': 'validpassword',
             'emailAddress': 'test@email.com',
@@ -559,8 +563,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/'
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_return_an_error_if_bad_phone_number(self, data_api_client):
+    def test_should_return_an_error_if_bad_phone_number(self):
 
         token = self._generate_token(role='buyer')
         res = self.client.post(
@@ -574,9 +577,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
         assert res.status_code == 400
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_strip_whitespace_surrounding_create_user_name_field(self, data_api_client):
-        data_api_client.create_user.return_value = {
+    def test_should_strip_whitespace_surrounding_create_user_name_field(self):
+        self.data_api_client.create_user.return_value = {
             "users": {
                 "id": "1234",
                 "emailAddress": "test@email.com",
@@ -584,7 +586,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
                 "role": "buyer",
             }
         }
-        data_api_client.get_user.return_value = None
+        self.data_api_client.get_user.return_value = None
         token = self._generate_token(role='buyer')
         self.client.post(
             '/user/create/{}'.format(token),
@@ -595,7 +597,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'buyer',
             'password': 'validpassword',
             'emailAddress': 'test@email.com',
@@ -603,9 +605,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
             'name': 'valid name'
         })
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_not_strip_whitespace_surrounding_create_user_password_field(self, data_api_client):
-        data_api_client.create_user.return_value = {
+    def test_should_not_strip_whitespace_surrounding_create_user_password_field(self):
+        self.data_api_client.create_user.return_value = {
             "users": {
                 "id": "1234",
                 "emailAddress": "test@email.com",
@@ -624,7 +625,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             }
         )
 
-        data_api_client.create_user.assert_called_once_with({
+        self.data_api_client.create_user.assert_called_once_with({
             'role': 'buyer',
             'password': '  validpassword  ',
             'emailAddress': 'test@email.com',
@@ -632,24 +633,23 @@ class TestSubmitCreateUser(BaseApplicationTest):
             'phoneNumber': '020-7930-4832',
         })
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_be_a_503_if_api_fails(self, data_api_client):
-        with self.app.app_context():
-            data_api_client.create_user.side_effect = HTTPError("bad email")
+    def test_should_be_a_503_if_api_fails(self):
+        self.data_api_client.create_user.side_effect = HTTPError("bad email")
 
-            token = self._generate_token(role='buyer')
-            res = self.client.post(
-                '/user/create/{}'.format(token),
-                data={
-                    'password': 'validpassword',
-                    'name': 'valid name'
-                }
-            )
-            assert res.status_code == 503
+        token = self._generate_token(role='buyer')
+        res = self.client.post(
+            '/user/create/{}'.format(token),
+            data={
+                'password': 'validpassword',
+                'name': 'valid name'
+            }
+        )
+        assert res.status_code == 503
 
-    @mock.patch('app.main.views.create_user.data_api_client')
-    def test_should_render_error_page_if_invalid_buyer_domain(self, data_api_client):
-        data_api_client.create_user.side_effect = HTTPError(mock.Mock(status_code=400), message='invalid_buyer_domain')
+    def test_should_render_error_page_if_invalid_buyer_domain(self):
+        self.data_api_client.create_user.side_effect = HTTPError(
+            mock.Mock(status_code=400), message='invalid_buyer_domain'
+        )
 
         token = self._generate_token(role='buyer')
         res = self.client.post(

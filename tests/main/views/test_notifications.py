@@ -6,19 +6,17 @@ import mock
 class TestUserResearchNotifications(BaseApplicationTest):
 
     def setup_method(self, method):
-        super(TestUserResearchNotifications, self).setup_method(method)
+        super().setup_method(method)
 
-        data_api_client_config = {'authenticate_user.return_value': self.user(
+        self.data_api_client_auth_patch = mock.patch('app.main.views.auth.data_api_client', autospec=True)
+        self.data_api_client_auth = self.data_api_client_auth_patch.start()
+        self.data_api_client_auth.authenticate_user.return_value = self.user(
             123, "email@email.com", 1234, 'name', 'name'
-        )}
-
-        self._data_api_client = mock.patch(
-            'app.main.views.auth.data_api_client', **data_api_client_config
         )
-        self.data_api_client_mock = self._data_api_client.start()
 
     def teardown_method(self, method):
-        self._data_api_client.stop()
+        self.data_api_client_auth_patch.stop()
+        super().teardown_method(method)
 
     def test_should_show_login_page(self):
         res = self.client.get("/user/notifications/user-research")

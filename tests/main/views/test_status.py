@@ -7,13 +7,14 @@ import mock
 class TestStatus(BaseApplicationTest):
 
     def setup_method(self, method):
-        super(TestStatus, self).setup_method(method)
+        super().setup_method(method)
 
         self._data_api_client_patch = mock.patch('app.main.views.status.data_api_client', autospec=True)
         self._data_api_client = self._data_api_client_patch.start()
 
     def teardown_method(self, method):
         self._data_api_client_patch.stop()
+        super().teardown_method(method)
 
     def test_should_return_200_from_elb_status_check(self):
         status_response = self.client.get('/user/_status?ignore-dependencies')
