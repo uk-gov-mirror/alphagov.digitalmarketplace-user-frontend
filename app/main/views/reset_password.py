@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from flask import abort, current_app, flash, redirect, render_template, url_for, Markup
+from flask import abort, current_app, flash, redirect, render_template, request, url_for, Markup
 
 from dmutils.user import User
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
 from dmutils.email.helpers import hash_string
 
 from .. import main
-from ..forms.auth_forms import EmailAddressForm, ChangePasswordForm
+from ..forms.auth_forms import EmailAddressForm, ChangePasswordForm, ChangeOldPasswordForm
 from ... import data_api_client
 
 
@@ -139,3 +139,20 @@ def update_password(token):
                                email_address=email_address,
                                form=form,
                                token=token), 400
+
+
+@main.route('/change-password', methods=["GET", "POST"])
+def change_password():
+    form = ChangeOldPasswordForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            # TODO: make sure old password is valid
+            # TODO: new password must meet constraints
+            # TODO: change the password!
+            return redirect(url_for('external.supplier_dashboard'))
+        else:
+            return render_template("auth/change-password.html",
+                                   form=form), 400
+
+    else:
+        return render_template("auth/change-password.html", form=ChangeOldPasswordForm()), 200

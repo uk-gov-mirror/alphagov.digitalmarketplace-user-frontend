@@ -251,3 +251,51 @@ class TestResetPassword(BaseApplicationTest):
 
         assert res.status_code == 503
         assert PASSWORD_RESET_EMAIL_ERROR in res.get_data(as_text=True)
+
+
+class TestChangePassword(BaseApplicationTest):
+
+    _user = None
+
+    def setup_method(self, method):
+        super().setup_method(method)
+
+        data_api_client_config = {'get_user.return_value': self.user(
+            123, "email@email.com", 1234, 'name', 'Name'
+        )}
+
+        self._user = {
+            "user": 123,
+            "email": 'email@email.com',
+        }
+
+        self.data_api_client_patch = mock.patch(
+            'app.main.views.reset_password.data_api_client', **data_api_client_config
+        )
+        self.data_api_client = self.data_api_client_patch.start()
+
+    def teardown_method(self, method):
+        self.data_api_client_patch.stop()
+        super().teardown_method(method)
+
+    def test_change_password_page_displays_correctly(self):
+        response = self.client.get('/user/change-password')
+
+        assert response.status_code == 200
+        document = html.fromstring(response.get_data(as_text=True))
+        form_labels = document.xpath('//form//label/text()')
+
+        for label in ['Old password', 'New password', 'Confirm new password']:
+            assert label in form_labels
+
+    def test_user_can_change_password(self):
+        response = self.client.post(
+            '/user/change-password',
+            data={
+                'old_password': '0987654321',
+                'password': '1234567890',
+                'confirm_password': '1234567890'
+            }
+        )
+        assert response.status_code == 302
+        assert response.location == 'http://localhost/suppliers'
