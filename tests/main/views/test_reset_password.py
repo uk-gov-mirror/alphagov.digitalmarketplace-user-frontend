@@ -284,6 +284,9 @@ class TestChangePassword(BaseApplicationTest):
 
         assert response.status_code == 200
         document = html.fromstring(response.get_data(as_text=True))
+
+        self.assert_breadcrumbs(response, [("Your account", "/suppliers")])
+
         form_labels = document.xpath('//form//label/text()')
 
         for label in ['Old password', 'New password', 'Confirm new password']:
