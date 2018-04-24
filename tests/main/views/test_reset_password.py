@@ -289,6 +289,8 @@ class TestChangePassword(BaseApplicationTest):
         for label in ['Old password', 'New password', 'Confirm new password']:
             assert label in form_labels
 
+        assert len(document.xpath('//a[text()="Return to your account"]')) == 1
+
     def test_user_can_change_password(self):
         self.login_as_supplier()
         response = self.client.post(

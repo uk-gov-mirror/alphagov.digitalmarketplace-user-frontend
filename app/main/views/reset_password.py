@@ -146,6 +146,13 @@ def update_password(token):
 @login_required
 def change_password():
     form = ChangeOldPasswordForm()
+    if current_user.role == 'supplier':
+        dashboard_url = url_for('external.supplier_dashboard')
+    elif current_user.role == "buyer":
+        dashboard_url = url_for('external.buyer_dashboard')
+    else:
+        dashboard_url = url_for('external.index')
+
     if request.method == 'POST':
         if form.validate_on_submit():
             # Make sure old password is valid
@@ -174,7 +181,11 @@ def change_password():
 
                 form.old_password.errors.append("Make sure you’ve entered the right password.")
 
-        return render_template("auth/change-password.html", form=form), 400
+        return render_template("auth/change-password.html", form=form, dashboard_url=dashboard_url), 400
 
     else:
-        return render_template("auth/change-password.html", form=ChangeOldPasswordForm()), 200
+        return render_template(
+            "auth/change-password.html",
+            form=ChangeOldPasswordForm(),
+            dashboard_url=dashboard_url
+        ), 200
