@@ -1,4 +1,5 @@
 import mock
+import pytest
 from lxml import html, cssselect
 
 from dmutils.email import generate_token
@@ -278,14 +279,24 @@ class TestChangePassword(BaseApplicationTest):
         self.data_api_client_patch.stop()
         super().teardown_method(method)
 
-    def test_change_password_page_displays_correctly(self):
-        self.login_as_supplier()
+    # TODO: admin role
+    @pytest.mark.parametrize(
+        'user_role, redirect_url',
+        [('buyer', '/buyers'), ('supplier', '/suppliers'), ('admin', '/admin')]
+    )
+    def test_change_password_page_displays_correctly(self, user_role, redirect_url):
+        if user_role == 'buyer':
+            self.login_as_buyer()
+        elif user_role.startswith('admin'):
+            self.login_as_admin()
+        else:
+            self.login_as_supplier()
         response = self.client.get('/user/change-password')
 
         assert response.status_code == 200
         document = html.fromstring(response.get_data(as_text=True))
 
-        self.assert_breadcrumbs(response, [("Your account", "/suppliers")])
+        self.assert_breadcrumbs(response, [("Your account", redirect_url)])
 
         form_labels = document.xpath('//form//label/text()')
 
@@ -294,8 +305,21 @@ class TestChangePassword(BaseApplicationTest):
 
         assert len(document.xpath('//a[text()="Return to your account"]')) == 1
 
-    def test_user_can_change_password(self):
-        self.login_as_supplier()
+    @pytest.mark.parametrize(
+        'user_role, redirect_url, user_email',
+        [
+            ('buyer', '/buyers', 'buyer@email.com'),
+            ('supplier', '/suppliers', 'email@email.com'),
+            ('admin', '/admin', 'admin@email.com')
+        ]
+    )
+    def test_user_can_change_password(self, user_role, redirect_url, user_email):
+        if user_role == 'buyer':
+            self.login_as_buyer()
+        elif user_role.startswith('admin'):
+            self.login_as_admin()
+        else:
+            self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
             data={
@@ -305,9 +329,9 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 302
-        assert response.location == 'http://localhost/suppliers'
+        assert response.location == 'http://localhost{}'.format(redirect_url)
 
-        self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater="email@email.com")
+        self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater=user_email)
         self.assert_flashes("You have successfully changed your password.")
 
     def test_old_password_needs_to_match_user_password(self):

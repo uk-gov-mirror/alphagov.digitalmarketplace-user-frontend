@@ -150,6 +150,8 @@ def change_password():
         dashboard_url = url_for('external.supplier_dashboard')
     elif current_user.role == "buyer":
         dashboard_url = url_for('external.buyer_dashboard')
+    elif current_user.role.startswith('admin'):
+        dashboard_url = url_for('external.admin_dashboard')
     else:
         dashboard_url = url_for('external.index')
 
@@ -173,7 +175,7 @@ def change_password():
                     flash(PASSWORD_UPDATED_MESSAGE)
                 else:
                     flash(PASSWORD_NOT_UPDATED_MESSAGE, 'error')
-                return redirect(url_for('external.supplier_dashboard'))
+                return redirect(dashboard_url)
             else:
                 current_app.logger.info(
                     "change_password.fail: failed to authenticate user {email_hash}",
