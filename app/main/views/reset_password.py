@@ -153,7 +153,16 @@ def change_password():
                 current_user.email_address,
                 form.old_password.data)
             if user_json:
-                # TODO: change the password!
+                response = data_api_client.update_user_password(
+                    current_user.id,
+                    form.password.data,
+                    updater=current_user.email_address
+                )
+                if response:
+                    current_app.logger.info(
+                        "User {user_id} successfully changed their password",
+                        extra={'user_id': current_user.id}
+                    )
                 return redirect(url_for('external.supplier_dashboard'))
             else:
                 current_app.logger.info(

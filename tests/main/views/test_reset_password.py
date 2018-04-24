@@ -302,7 +302,9 @@ class TestChangePassword(BaseApplicationTest):
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
 
-    def test_old_passowrd_needs_to_match_user_password(self):
+        self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater="email@email.com")
+
+    def test_old_password_needs_to_match_user_password(self):
         self.login_as_supplier()
         self.data_api_client.authenticate_user.return_value = None
         response = self.client.post(
