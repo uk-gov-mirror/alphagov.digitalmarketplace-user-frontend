@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import abort, current_app, flash, redirect, render_template, request, url_for, Markup
+from flask_login import current_user
 
 from dmutils.user import User
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
@@ -146,13 +147,21 @@ def change_password():
     form = ChangeOldPasswordForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            # TODO: make sure old password is valid
-            # TODO: new password must meet constraints
-            # TODO: change the password!
-            return redirect(url_for('external.supplier_dashboard'))
-        else:
-            return render_template("auth/change-password.html",
-                                   form=form), 400
+            # Make sure old password is valid
+            user_json = data_api_client.authenticate_user(
+                current_user.email_address,
+                form.old_password.data)
+            if user_json:
+                # TODO: change the password!
+                return redirect(url_for('external.supplier_dashboard'))
+            else:
+                current_app.logger.info(
+                    "change_password.fail: failed to authenticate user {email_hash}",
+                    extra={'email_hash': hash_string(current_user.email_address)})
+
+                form.old_password.errors.append("Make sure you’ve entered the right password.")
+
+        return render_template("auth/change-password.html", form=form), 400
 
     else:
         return render_template("auth/change-password.html", form=ChangeOldPasswordForm()), 200
