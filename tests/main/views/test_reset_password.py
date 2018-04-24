@@ -303,6 +303,7 @@ class TestChangePassword(BaseApplicationTest):
         assert response.location == 'http://localhost/suppliers'
 
         self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater="email@email.com")
+        self.assert_flashes("You have successfully changed your password.")
 
     def test_old_password_needs_to_match_user_password(self):
         self.login_as_supplier()
@@ -369,3 +370,18 @@ class TestChangePassword(BaseApplicationTest):
         )
         assert response.status_code == 302
         assert response.location == 'http://localhost/user/login?next=%2Fuser%2Fchange-password'
+
+    def test_update_password_failure_redirects_and_shows_flashed_error_message(self):
+        self.login_as_supplier()
+        self.data_api_client.update_user_password.return_value = None
+        response = self.client.post(
+            '/user/change-password',
+            data={
+                'old_password': '1234567890',
+                'password': '0987654321',
+                'confirm_password': '0987654321'
+            }
+        )
+        assert response.status_code == 302
+        assert response.location == 'http://localhost/suppliers'
+        self.assert_flashes("Could not update password due to an error.", 'error')

@@ -163,6 +163,9 @@ def change_password():
                         "User {user_id} successfully changed their password",
                         extra={'user_id': current_user.id}
                     )
+                    flash(PASSWORD_UPDATED_MESSAGE)
+                else:
+                    flash(PASSWORD_NOT_UPDATED_MESSAGE, 'error')
                 return redirect(url_for('external.supplier_dashboard'))
             else:
                 current_app.logger.info(
