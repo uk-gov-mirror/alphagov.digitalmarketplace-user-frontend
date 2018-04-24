@@ -318,6 +318,7 @@ class TestChangePassword(BaseApplicationTest):
         assert response.status_code == 400
 
     def test_new_password_should_be_over_ten_chars_long(self):
+        self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
             data={
@@ -330,6 +331,7 @@ class TestChangePassword(BaseApplicationTest):
         assert PASSWORD_INVALID_ERROR in response.get_data(as_text=True)
 
     def test_password_should_be_under_51_chars_long(self):
+        self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
             data={
@@ -342,6 +344,7 @@ class TestChangePassword(BaseApplicationTest):
         assert PASSWORD_INVALID_ERROR in response.get_data(as_text=True)
 
     def test_passwords_should_match(self):
+        self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
             data={
@@ -354,4 +357,13 @@ class TestChangePassword(BaseApplicationTest):
         assert PASSWORD_MISMATCH_ERROR in response.get_data(as_text=True)
 
     def test_user_must_be_logged_in_to_change_password(self):
-        pass
+        response = self.client.post(
+            '/user/change-password',
+            data={
+                'old_password': '1234567890',
+                'password': '0987654321',
+                'confirm_password': '0987654321'
+            }
+        )
+        assert response.status_code == 302
+        assert response.location == 'http://localhost/user/login?next=%2Fuser%2Fchange-password'

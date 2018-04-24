@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import abort, current_app, flash, redirect, render_template, request, url_for, Markup
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from dmutils.user import User
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
@@ -143,6 +143,7 @@ def update_password(token):
 
 
 @main.route('/change-password', methods=["GET", "POST"])
+@login_required
 def change_password():
     form = ChangeOldPasswordForm()
     if request.method == 'POST':
