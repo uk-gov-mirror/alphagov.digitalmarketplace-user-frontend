@@ -9,6 +9,7 @@ from dmutils.email.helpers import hash_string
 
 from .. import main
 from ..forms.auth_forms import EmailAddressForm, ChangePasswordForm, ChangeOldPasswordForm
+from ..helpers.login_helpers import get_user_dashboard_url
 from ... import data_api_client
 
 
@@ -146,14 +147,7 @@ def update_password(token):
 @login_required
 def change_password():
     form = ChangeOldPasswordForm()
-    if current_user.role == 'supplier':
-        dashboard_url = url_for('external.supplier_dashboard')
-    elif current_user.role == "buyer":
-        dashboard_url = url_for('external.buyer_dashboard')
-    elif current_user.role.startswith('admin'):
-        dashboard_url = url_for('external.admin_dashboard')
-    else:
-        dashboard_url = url_for('external.index')
+    dashboard_url = get_user_dashboard_url(current_user)
 
     if request.method == 'POST':
         if form.validate_on_submit():
