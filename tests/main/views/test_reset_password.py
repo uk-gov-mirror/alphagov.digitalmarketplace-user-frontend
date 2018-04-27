@@ -279,7 +279,6 @@ class TestChangePassword(BaseApplicationTest):
         self.data_api_client_patch.stop()
         super().teardown_method(method)
 
-    # TODO: admin role
     @pytest.mark.parametrize(
         'user_role, redirect_url',
         [('buyer', '/buyers'), ('supplier', '/suppliers'), ('admin', '/admin')]
