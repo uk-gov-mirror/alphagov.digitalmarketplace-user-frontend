@@ -17,6 +17,7 @@ PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
 PASSWORD_RESET_EMAIL_ERROR = "Failed to send password reset."
+PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
 
 
 class TestResetPassword(BaseApplicationTest):
@@ -312,7 +313,8 @@ class TestChangePassword(BaseApplicationTest):
             ('admin', '/admin', 'admin@email.com')
         ]
     )
-    def test_user_can_change_password(self, user_role, redirect_url, user_email):
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    def test_user_can_change_password(self, send_email, user_role, redirect_url, user_email):
         if user_role == 'buyer':
             self.login_as_buyer()
         elif user_role.startswith('admin'):
@@ -332,6 +334,15 @@ class TestChangePassword(BaseApplicationTest):
 
         self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater=user_email)
         self.assert_flashes("You have successfully changed your password.")
+
+        send_email.assert_called_once_with(
+            user_email,
+            template_id='1c4c0562-44aa-4ae4-ba61-e17c544df535',
+            personalisation={
+                'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
+            },
+            reference=MockMatcher(lambda x: 'change-password-alert' in x)
+        )
 
     def test_old_password_needs_to_match_user_password(self):
         self.login_as_supplier()
@@ -413,3 +424,20 @@ class TestChangePassword(BaseApplicationTest):
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
         self.assert_flashes("Could not update password due to an error.", 'error')
+
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    def test_should_raise_an_error_if_send_change_password_email_fails(self, send_email):
+        self.login_as_supplier()
+        send_email.side_effect = EmailError(Exception('API is down'))
+
+        response = self.client.post(
+            '/user/change-password',
+            data={
+                'old_password': '1234567890',
+                'password': '0987654321',
+                'confirm_password': '0987654321'
+            }
+        )
+
+        assert response.status_code == 503
+        assert PASSWORD_CHANGE_EMAIL_ERROR in response.get_data(as_text=True)

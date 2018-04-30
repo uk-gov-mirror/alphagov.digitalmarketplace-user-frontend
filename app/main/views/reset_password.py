@@ -166,6 +166,46 @@ def change_password():
                         "User {user_id} successfully changed their password",
                         extra={'user_id': current_user.id}
                     )
+
+                    notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
+
+                    token = generate_token(
+                        {
+                            "user": current_user.id
+                        },
+                        current_app.config['SHARED_EMAIL_KEY'],
+                        current_app.config['RESET_PASSWORD_SALT']
+                    )
+
+                    try:
+                        notify_client.send_email(
+                            current_user.email_address,
+                            template_id=current_app.config['NOTIFY_TEMPLATES']['change_password_alert'],
+                            personalisation={
+                                'url': url_for('main.reset_password', token=token, _external=True),
+                            },
+                            reference='change-password-alert-{}'.format(hash_string(current_user.email_address))
+                        )
+                    except EmailError as e:
+                        current_app.logger.error(
+                            "{code}: Password change alert email for email_hash {email_hash} failed to send. "
+                            "Error: {error}",
+                            extra={
+                                'email_hash': hash_string(current_user.email_address),
+                                'error': str(e),
+                                'code': 'login.password-change-alert-email.notify-error'
+                            }
+                        )
+                        abort(503, response="Failed to send password change alert.")
+
+                    current_app.logger.info(
+                        "{code}: Sending password change alert email for email_hash {email_hash}",
+                        extra={
+                            'email_hash': hash_string(current_user.email_address),
+                            'code': 'login.password-change-alert-email.sent'
+                        }
+                    )
+
                     flash(PASSWORD_UPDATED_MESSAGE)
                 else:
                     flash(PASSWORD_NOT_UPDATED_MESSAGE, 'error')

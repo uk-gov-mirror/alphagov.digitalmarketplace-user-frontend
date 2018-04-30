@@ -27,6 +27,7 @@ class Config(object):
 
     NOTIFY_TEMPLATES = {
         'reset_password': '7501026e-d0ba-4cd1-b64f-6a19e1f0913f',
+        'change_password_alert': '1c4c0562-44aa-4ae4-ba61-e17c544df535',
     }
 
     DEBUG = False
@@ -111,6 +112,7 @@ class Preview(Live):
 class Staging(Live):
     NOTIFY_TEMPLATES = {
         'reset_password': '4ae02cdd-65fd-417f-8c24-61260229f9af',
+        'change_password_alert': '1c4c0562-44aa-4ae4-ba61-e17c544df535',
     }
     WTF_CSRF_ENABLED = False
 
