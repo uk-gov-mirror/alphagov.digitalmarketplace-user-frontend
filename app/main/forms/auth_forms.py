@@ -32,7 +32,7 @@ class EmailAddressForm(FlaskForm):
     )
 
 
-class ChangePasswordForm(FlaskForm):
+class PasswordResetForm(FlaskForm):
     password = PasswordField(
         'New password', id="input_password",
         validators=[
@@ -52,7 +52,10 @@ class ChangePasswordForm(FlaskForm):
     )
 
 
-class ChangeOldPasswordForm(ChangePasswordForm):
+class PasswordChangeForm(PasswordResetForm):
+    """
+    Subclasses PasswordResetForm so we can keep validation/password policy in one place
+    """
     old_password = PasswordField(
         'Old password', id="input_old_password",
         validators=[

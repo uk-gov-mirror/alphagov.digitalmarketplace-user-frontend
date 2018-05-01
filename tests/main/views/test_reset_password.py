@@ -17,7 +17,11 @@ PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
 PASSWORD_RESET_EMAIL_ERROR = "Failed to send password reset."
+PASSWORD_CHANGE_AUTH_ERROR = "Make sure you’ve entered the right password."
 PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
+PASSWORD_CHANGE_UPDATE_ERROR = "Could not update password due to an error."
+
+PASSWORD_CHANGE_SUCCESS_MESSAGE = "You have successfully changed your password."
 
 
 class TestResetPassword(BaseApplicationTest):
@@ -235,7 +239,7 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 302
         send_email.assert_called_once_with(
             "email@email.com",
-            template_id='7501026e-d0ba-4cd1-b64f-6a19e1f0913f',
+            template_id=self.app.config['NOTIFY_TEMPLATES']['reset_password'],
             personalisation={
                 'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
             },
@@ -287,7 +291,7 @@ class TestChangePassword(BaseApplicationTest):
     def test_change_password_page_displays_correctly(self, user_role, redirect_url):
         if user_role == 'buyer':
             self.login_as_buyer()
-        elif user_role.startswith('admin'):
+        elif user_role == 'admin':
             self.login_as_admin()
         else:
             self.login_as_supplier()
@@ -317,7 +321,7 @@ class TestChangePassword(BaseApplicationTest):
     def test_user_can_change_password(self, send_email, user_role, redirect_url, user_email):
         if user_role == 'buyer':
             self.login_as_buyer()
-        elif user_role.startswith('admin'):
+        elif user_role == 'admin':
             self.login_as_admin()
         else:
             self.login_as_supplier()
@@ -333,11 +337,11 @@ class TestChangePassword(BaseApplicationTest):
         assert response.location == 'http://localhost{}'.format(redirect_url)
 
         self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater=user_email)
-        self.assert_flashes("You have successfully changed your password.")
+        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE)
 
         send_email.assert_called_once_with(
             user_email,
-            template_id='1c4c0562-44aa-4ae4-ba61-e17c544df535',
+            template_id=self.app.config['NOTIFY_TEMPLATES']['change_password_alert'],
             personalisation={
                 'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
             },
@@ -355,7 +359,7 @@ class TestChangePassword(BaseApplicationTest):
                 'confirm_password': '1234567890'
             }
         )
-        assert self.strip_all_whitespace("Make sure you’ve entered the right password.") \
+        assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR) \
             in self.strip_all_whitespace(response.get_data(as_text=True))
         assert response.status_code == 400
 
@@ -423,7 +427,7 @@ class TestChangePassword(BaseApplicationTest):
         )
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
-        self.assert_flashes("Could not update password due to an error.", 'error')
+        self.assert_flashes(PASSWORD_CHANGE_UPDATE_ERROR, 'error')
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_should_raise_an_error_if_send_change_password_email_fails(self, send_email):

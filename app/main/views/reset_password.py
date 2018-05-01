@@ -8,7 +8,7 @@ from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_
 from dmutils.email.helpers import hash_string
 
 from .. import main
-from ..forms.auth_forms import EmailAddressForm, ChangePasswordForm, ChangeOldPasswordForm
+from ..forms.auth_forms import EmailAddressForm, PasswordResetForm, PasswordChangeForm
 from ..helpers.login_helpers import get_user_dashboard_url
 from ... import data_api_client
 
@@ -111,13 +111,13 @@ def reset_password(token):
 
     return render_template("auth/reset-password.html",
                            email_address=email_address,
-                           form=ChangePasswordForm(),
+                           form=PasswordResetForm(),
                            token=token), 200
 
 
 @main.route('/reset-password/<token>', methods=["POST"])
 def update_password(token):
-    form = ChangePasswordForm()
+    form = PasswordResetForm()
     decoded = decode_password_reset_token(token, data_api_client)
     if 'error' in decoded:
         flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, 'error')
@@ -146,7 +146,7 @@ def update_password(token):
 @main.route('/change-password', methods=["GET", "POST"])
 @login_required
 def change_password():
-    form = ChangeOldPasswordForm()
+    form = PasswordChangeForm()
     dashboard_url = get_user_dashboard_url(current_user)
 
     if request.method == 'POST':
@@ -222,6 +222,6 @@ def change_password():
     else:
         return render_template(
             "auth/change-password.html",
-            form=ChangeOldPasswordForm(),
+            form=PasswordChangeForm(),
             dashboard_url=dashboard_url
         ), 200
