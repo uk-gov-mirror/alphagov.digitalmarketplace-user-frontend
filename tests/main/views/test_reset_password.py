@@ -246,9 +246,10 @@ class TestResetPassword(BaseApplicationTest):
             reference='reset-password-8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50='
         )
 
+    @mock.patch('app.main.helpers.logging_helpers.current_app')
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
-    def test_should_be_an_error_if_send_email_fails(self, send_email):
-        send_email.side_effect = EmailError(Exception('API is down'))
+    def test_should_be_an_error_if_send_email_fails(self, send_email, current_app):
+        send_email.side_effect = EmailError(Exception('Notify API is down'))
 
         res = self.client.post(
             '/user/reset-password',
@@ -257,6 +258,18 @@ class TestResetPassword(BaseApplicationTest):
 
         assert res.status_code == 503
         assert PASSWORD_RESET_EMAIL_ERROR in res.get_data(as_text=True)
+
+        assert current_app.logger.error.call_args_list == [
+            mock.call(
+                '{code}: {email_type} email for email_hash {email_hash} failed to send. Error: {error}',
+                extra={
+                    'email_hash': '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
+                    'error': 'Notify API is down',
+                    'code': 'login.reset-email.notify-error',
+                    'email_type': "Password reset"
+                }
+            )
+        ]
 
 
 class TestChangePassword(BaseApplicationTest):
@@ -429,10 +442,11 @@ class TestChangePassword(BaseApplicationTest):
         assert response.location == 'http://localhost/suppliers'
         self.assert_flashes(PASSWORD_CHANGE_UPDATE_ERROR, 'error')
 
+    @mock.patch('app.main.helpers.logging_helpers.current_app')
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
-    def test_should_raise_an_error_if_send_change_password_email_fails(self, send_email):
+    def test_should_log_an_error_and_redirect_if_change_password_email_sending_fails(self, send_email, current_app):
         self.login_as_supplier()
-        send_email.side_effect = EmailError(Exception('API is down'))
+        send_email.side_effect = EmailError(Exception('Notify API is down'))
 
         response = self.client.post(
             '/user/change-password',
@@ -443,5 +457,18 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
 
-        assert response.status_code == 503
-        assert PASSWORD_CHANGE_EMAIL_ERROR in response.get_data(as_text=True)
+        assert response.status_code == 302
+        assert response.location == 'http://localhost/suppliers'
+        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE)
+
+        assert current_app.logger.error.call_args_list == [
+            mock.call(
+                '{code}: {email_type} email for email_hash {email_hash} failed to send. Error: {error}',
+                extra={
+                    'email_hash': '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
+                    'error': 'Notify API is down',
+                    'code': 'login.password-change-alert-email.notify-error',
+                    'email_type': "Password change alert"
+                }
+            )
+        ]

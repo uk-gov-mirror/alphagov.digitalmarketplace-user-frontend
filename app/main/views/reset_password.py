@@ -10,6 +10,7 @@ from dmutils.email.helpers import hash_string
 from .. import main
 from ..forms.auth_forms import EmailAddressForm, PasswordResetForm, PasswordChangeForm
 from ..helpers.login_helpers import get_user_dashboard_url
+from ..helpers.logging_helpers import log_email_error
 from ... import data_api_client
 
 
@@ -66,14 +67,12 @@ def send_reset_password_email():
                     },
                     reference='reset-password-{}'.format(hash_string(user.email_address))
                 )
-            except EmailError as e:
-                current_app.logger.error(
-                    "{code}: Password reset email for email_hash {email_hash} failed to send. Error: {error}",
-                    extra={
-                        'email_hash': hash_string(user.email_address),
-                        'error': str(e),
-                        'code': 'login.reset-email.notify-error'
-                    }
+            except EmailError as exc:
+                log_email_error(
+                    exc,
+                    "Password reset",
+                    "login.reset-email.notify-error",
+                    user.email_address
                 )
                 abort(503, response="Failed to send password reset.")
 
@@ -186,25 +185,22 @@ def change_password():
                             },
                             reference='change-password-alert-{}'.format(hash_string(current_user.email_address))
                         )
-                    except EmailError as e:
-                        current_app.logger.error(
-                            "{code}: Password change alert email for email_hash {email_hash} failed to send. "
-                            "Error: {error}",
+
+                        current_app.logger.info(
+                            "{code}: Password change alert email sent for email_hash {email_hash}",
                             extra={
                                 'email_hash': hash_string(current_user.email_address),
-                                'error': str(e),
-                                'code': 'login.password-change-alert-email.notify-error'
+                                'code': 'login.password-change-alert-email.sent'
                             }
                         )
-                        abort(503, response="Failed to send password change alert.")
 
-                    current_app.logger.info(
-                        "{code}: Sending password change alert email for email_hash {email_hash}",
-                        extra={
-                            'email_hash': hash_string(current_user.email_address),
-                            'code': 'login.password-change-alert-email.sent'
-                        }
-                    )
+                    except EmailError as exc:
+                        log_email_error(
+                            exc,
+                            "Password change alert",
+                            "login.password-change-alert-email.notify-error",
+                            current_user.email_address
+                        )
 
                     flash(PASSWORD_UPDATED_MESSAGE)
                 else:
