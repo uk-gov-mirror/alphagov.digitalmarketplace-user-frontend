@@ -4,11 +4,11 @@ from flask import (
     flash,
     render_template,
     request,
-    redirect,
-    url_for
+    redirect
 )
 from .. import main
 from ..forms.user_research import UserResearchOptInForm
+from ..helpers.login_helpers import get_user_dashboard_url
 from ... import data_api_client
 
 
@@ -21,13 +21,7 @@ def user_research_consent():
     status_code = 200
     errors = {}
 
-    # Determine the correct dashboard url.
-    if current_user.role == 'supplier':
-        dashboard_url = url_for('external.supplier_dashboard')
-    elif current_user.role == "buyer":
-        dashboard_url = url_for('external.buyer_dashboard')
-    else:
-        dashboard_url = url_for('external.index')
+    dashboard_url = get_user_dashboard_url(current_user)
 
     if request.method == "POST":
         if form.validate_on_submit():

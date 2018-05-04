@@ -35,3 +35,14 @@ def redirect_logged_in_user(next_url=None, account_created=False):
         flash("{}?account-created=true".format(redirect_path), category="track-page-view")
 
     return redirect(redirect_path)
+
+
+def get_user_dashboard_url(current_user_):
+    if current_user_.role == 'supplier':
+        return url_for('external.supplier_dashboard')
+    elif current_user_.role == "buyer":
+        return url_for('external.buyer_dashboard')
+    elif current_user_.role.startswith('admin'):
+        return url_for('external.admin_dashboard')
+
+    return None
