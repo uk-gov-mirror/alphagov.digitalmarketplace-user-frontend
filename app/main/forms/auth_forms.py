@@ -33,9 +33,6 @@ class EmailAddressForm(FlaskForm):
 
 
 class PasswordChangeForm(FlaskForm):
-    """
-    Fields have numbered prefixes to allow ordering of error messages in the validation masthead
-    """
     old_password = PasswordField(
         'Old password', id="input_old_password",
         validators=[
