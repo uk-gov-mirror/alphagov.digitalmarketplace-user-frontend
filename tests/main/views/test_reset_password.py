@@ -98,6 +98,11 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 200
         assert "Reset password for email@email.com" in res.get_data(as_text=True)
 
+        # Reset form should not display the 'Old password' field
+        document = html.fromstring(res.get_data(as_text=True))
+        form_labels = document.xpath('//main//form//label/text()')
+        assert form_labels == ['New password', 'Confirm new password']
+
     def test_password_should_not_be_empty(self):
         token = generate_token(
             self._user,

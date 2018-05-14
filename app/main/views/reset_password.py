@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
 from flask import abort, current_app, flash, redirect, render_template, request, url_for, Markup
 from flask_login import current_user, login_required
 
@@ -146,6 +147,7 @@ def update_password(token):
 @login_required
 def change_password():
     form = PasswordChangeForm()
+    errors = {}
     dashboard_url = get_user_dashboard_url(current_user)
 
     if request.method == 'POST':
@@ -213,7 +215,19 @@ def change_password():
 
                 form.old_password.errors.append("Make sure you’ve entered the right password.")
 
-        return render_template("auth/change-password.html", form=form, dashboard_url=dashboard_url), 400
+        if form.errors:
+            # Format errors as a nested ordered dict for use with toolkit templates
+            errors = OrderedDict(
+                (key, {'question': form[key].label.text, 'input_name': key, 'message': form[key].errors[0]})
+                for key in form.errors.keys()
+            )
+
+        return render_template(
+            "auth/change-password.html",
+            form=form,
+            errors=errors,
+            dashboard_url=dashboard_url
+        ), 400
 
     else:
         return render_template(
