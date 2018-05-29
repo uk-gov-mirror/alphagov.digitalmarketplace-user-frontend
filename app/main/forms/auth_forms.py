@@ -4,6 +4,12 @@ from wtforms.validators import DataRequired, EqualTo, Length, Regexp
 from dmutils.forms import StripWhitespaceStringField, StringField
 
 
+EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
+PASSWORD_HINT = "Must be between 10 and 50 characters"
+PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
+                    "support team can help you fix them quickly."
+
+
 class LoginForm(FlaskForm):
     email_address = StripWhitespaceStringField(
         'Email address', id="input_email_address",
@@ -19,6 +25,10 @@ class LoginForm(FlaskForm):
             DataRequired(message="You must provide your password")
         ]
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.email_address.hint = EMAIL_LOGIN_HINT
 
 
 class EmailAddressForm(FlaskForm):
@@ -56,6 +66,10 @@ class PasswordChangeForm(FlaskForm):
             EqualTo('password', message="The passwords you entered do not match")
         ]
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.password.hint = PASSWORD_HINT
 
 
 class PasswordResetForm(PasswordChangeForm):
@@ -98,3 +112,8 @@ class CreateUserForm(FlaskForm):
                    )
         ]
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.phone_number.hint = PHONE_NUMBER_HINT
+        self.password.hint = PASSWORD_HINT

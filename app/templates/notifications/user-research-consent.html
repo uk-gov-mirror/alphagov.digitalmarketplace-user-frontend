@@ -22,12 +22,7 @@
 {% block main_content %}
 
 <div class="grid-row notification-user-research">
-
-  {% if errors %}
-    {% with errors = errors.values() %}
-      {% include 'toolkit/forms/validation.html' %}
-    {% endwith %}
-  {% endif %}
+  {% include 'toolkit/forms/validation.html' %}
 
   <div class="column-two-thirds">
     {% with heading = "{}".format(

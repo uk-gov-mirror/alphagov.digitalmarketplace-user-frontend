@@ -6,6 +6,9 @@ from flask import (
     request,
     redirect
 )
+
+from dmutils.forms import get_errors_from_wtform
+
 from .. import main
 from ..forms.user_research import UserResearchOptInForm
 from ..helpers.login_helpers import get_user_dashboard_url
@@ -39,10 +42,7 @@ def user_research_consent():
         else:
             # If the form is not valid set the status code and parse the errors into an acceptable format.
             status_code = 400
-            errors = {
-                key: {'question': form[key].label.text, 'input_name': key, 'message': form[key].errors[0]}
-                for key, value in form.errors.items()
-            }
+            errors = get_errors_from_wtform(form)
     else:
         # Update the form with the existing value if this is not a POST
         user = data_api_client.get_user(current_user.id)

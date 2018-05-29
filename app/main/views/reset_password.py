@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
 from flask import abort, current_app, flash, redirect, render_template, request, url_for, Markup
 from flask_login import current_user, login_required
 
-from dmutils.user import User
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
 from dmutils.email.helpers import hash_string
+from dmutils.forms import get_errors_from_wtform
+from dmutils.user import User
 
 from .. import main
 from ..forms.auth_forms import EmailAddressForm, PasswordResetForm, PasswordChangeForm
-from ..helpers.login_helpers import get_user_dashboard_url
 from ..helpers.logging_helpers import log_email_error
+from ..helpers.login_helpers import get_user_dashboard_url
 from ... import data_api_client
 
 
@@ -108,10 +108,13 @@ def reset_password(token):
         return redirect(url_for('.request_password_reset'))
 
     email_address = decoded['email']
+    form = PasswordResetForm()
+    errors = get_errors_from_wtform(form)
 
     return render_template("auth/reset-password.html",
                            email_address=email_address,
-                           form=PasswordResetForm(),
+                           form=form,
+                           errors=errors,
                            token=token), 200
 
 
@@ -140,6 +143,7 @@ def update_password(token):
         return render_template("auth/reset-password.html",
                                email_address=email_address,
                                form=form,
+                               errors=get_errors_from_wtform(form),
                                token=token), 400
 
 
@@ -147,7 +151,6 @@ def update_password(token):
 @login_required
 def change_password():
     form = PasswordChangeForm()
-    errors = {}
     dashboard_url = get_user_dashboard_url(current_user)
 
     if request.method == 'POST':
@@ -215,13 +218,7 @@ def change_password():
 
                 form.old_password.errors.append("Make sure you’ve entered the right password.")
 
-        if form.errors:
-            # Format errors as a nested ordered dict for use with toolkit templates
-            errors = OrderedDict(
-                (key, {'question': form[key].label.text, 'input_name': key, 'message': form[key].errors[0]})
-                for key in form.errors.keys()
-            )
-
+        errors = get_errors_from_wtform(form)
         return render_template(
             "auth/change-password.html",
             form=form,
@@ -230,8 +227,11 @@ def change_password():
         ), 400
 
     else:
+        form = PasswordChangeForm()
+        errors = get_errors_from_wtform(form)
         return render_template(
             "auth/change-password.html",
-            form=PasswordChangeForm(),
+            form=form,
+            errors=errors,
             dashboard_url=dashboard_url
         ), 200
