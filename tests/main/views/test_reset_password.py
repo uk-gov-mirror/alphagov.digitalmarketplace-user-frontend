@@ -289,6 +289,10 @@ class TestChangePassword(BaseApplicationTest):
         data_api_client_config = {'get_user.return_value': self.user(
             123, "email@email.com", 1234, 'name', 'Name'
         )}
+        auth_forms_extra_data_api_client_config = {
+            'authenticate_user.return_value': self.user(
+                123, "email@email.com", 1234, 'Supplier Name', 'Name', role='supplier')
+        }
 
         self._user = {
             "user": 123,
@@ -300,8 +304,15 @@ class TestChangePassword(BaseApplicationTest):
         )
         self.data_api_client = self.data_api_client_patch.start()
 
+        self.auth_forms_data_api_client_patch = mock.patch(
+            'app.main.forms.auth_forms.data_api_client', **data_api_client_config,
+            **auth_forms_extra_data_api_client_config
+        )
+        self.auth_forms_data_api_client = self.auth_forms_data_api_client_patch.start()
+
     def teardown_method(self, method):
         self.data_api_client_patch.stop()
+        self.auth_forms_data_api_client.stop()
         super().teardown_method(method)
 
     @pytest.mark.parametrize(
@@ -370,7 +381,7 @@ class TestChangePassword(BaseApplicationTest):
 
     def test_old_password_needs_to_match_user_password(self):
         self.login_as_supplier()
-        self.data_api_client.authenticate_user.return_value = None
+        self.auth_forms_data_api_client.authenticate_user.return_value = None
         response = self.client.post(
             '/user/change-password',
             data={
