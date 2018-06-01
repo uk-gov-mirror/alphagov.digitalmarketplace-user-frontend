@@ -10,6 +10,7 @@ from .. import main
 from ..forms.user_research import UserResearchOptInForm
 from ..helpers.login_helpers import get_user_dashboard_url
 from ... import data_api_client
+import datetime
 
 
 @main.route('/notifications/user-research', methods=["GET", "POST"])
@@ -53,7 +54,9 @@ def user_research_consent():
     cookie_name = 'seen_user_research_message'
 
     if cookie_name not in request.cookies:
-        additional_headers = {'Set-Cookie': "{}=yes; Path=/".format(cookie_name)}
+        expiry_date = datetime.datetime.now() + datetime.timedelta(90)
+        expiry_date = expiry_date.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
+        additional_headers = {'Set-Cookie': "{}=yes; Path=/; Expires={}".format(cookie_name, expiry_date)}
 
     return render_template(
         "notifications/user-research-consent.html",
