@@ -3,6 +3,7 @@ from flask_login import login_user
 
 from dmapiclient import HTTPError
 from dmutils.email import decode_invitation_token
+from dmutils.forms import get_errors_from_wtform
 from dmutils.user import User
 
 from .. import main
@@ -53,6 +54,7 @@ def create_user(encoded_token):
             "auth/create-user.html",
             email_address=token['email_address'],
             form=form,
+            errors=get_errors_from_wtform(form),
             role=role,
             supplier_name=token.get('supplier_name'),
             token=encoded_token), 200
@@ -101,6 +103,7 @@ def submit_create_user(encoded_token):
             "auth/create-user.html",
             email_address=token['email_address'],
             form=form,
+            errors=get_errors_from_wtform(form),
             role=role,
             supplier_name=token.get('supplier_name'),
             token=encoded_token), 400

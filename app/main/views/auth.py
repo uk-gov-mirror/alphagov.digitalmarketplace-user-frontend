@@ -13,6 +13,7 @@ from flask import (
 )
 from flask_login import logout_user, login_user
 
+from dmutils.forms import get_errors_from_wtform
 from dmutils.user import User
 from dmutils.email.helpers import hash_string
 
@@ -32,9 +33,14 @@ def render_login():
     next_url = request.args.get('next')
     if current_user.is_authenticated() and not get_flashed_messages():
         return redirect_logged_in_user(next_url)
+
+    form = LoginForm()
+    errors = get_errors_from_wtform(form)
+
     return render_template(
         "auth/login.html",
-        form=LoginForm(),
+        form=form,
+        errors=errors,
         next=next_url), 200
 
 
@@ -54,6 +60,7 @@ def process_login():
             return render_template(
                 "auth/login.html",
                 form=form,
+                errors=get_errors_from_wtform(form),
                 next=next_url), 403
 
         user = User.from_json(user_json)
@@ -64,9 +71,11 @@ def process_login():
         return redirect_logged_in_user(next_url)
 
     else:
+        errors = get_errors_from_wtform(form)
         return render_template(
             "auth/login.html",
             form=form,
+            errors=errors,
             next=next_url), 400
 
 
