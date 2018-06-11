@@ -24,7 +24,7 @@ from ... import data_api_client
 
 
 NO_ACCOUNT_MESSAGE = Markup("""Make sure you've entered the right email address and password. Accounts
-    are locked after 5 failed attempts. If you’ve forgotten your password you can reset it by clicking
+    are locked after 10 failed attempts. If you’ve forgotten your password you can reset it by clicking
     ‘Forgotten password’.""")
 
 
