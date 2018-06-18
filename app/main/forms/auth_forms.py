@@ -1,11 +1,11 @@
 from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import PasswordField
+from wtforms import PasswordField, StringField
 from wtforms.validators import DataRequired, EqualTo, Length, Regexp, ValidationError
 
 from dmutils.email.helpers import hash_string
-from dmutils.forms import StripWhitespaceStringField, StringField
+from dmutils.forms import StripWhitespaceStringField
 
 from app import data_api_client
 
