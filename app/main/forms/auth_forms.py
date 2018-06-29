@@ -10,6 +10,7 @@ from dmutils.forms import StripWhitespaceStringField
 from app import data_api_client
 
 
+EMAIL_REGEX = "^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
 PASSWORD_HINT = "Must be between 10 and 50 characters"
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
@@ -21,7 +22,7 @@ class LoginForm(FlaskForm):
         'Email address', id="input_email_address",
         validators=[
             DataRequired(message="You must provide an email address"),
-            Regexp("^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$",
+            Regexp(EMAIL_REGEX,
                    message="You must provide a valid email address")
         ]
     )
@@ -42,10 +43,14 @@ class EmailAddressForm(FlaskForm):
         'Email address', id="input_email_address",
         validators=[
             DataRequired(message="You must provide an email address"),
-            Regexp("^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$",
+            Regexp(EMAIL_REGEX,
                    message="You must provide a valid email address")
         ]
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.email_address.hint = EMAIL_LOGIN_HINT
 
 
 class MatchesCurrentPassword:
