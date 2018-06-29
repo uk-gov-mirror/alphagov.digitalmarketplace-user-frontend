@@ -2,6 +2,22 @@
 
 {% block page_title %}Log in – Digital Marketplace{% endblock %}
 
+{% block breadcrumb %}
+  {%
+    with items = [
+      {
+        "link": "/",
+        "label": "Digital Marketplace"
+      },
+      {
+        "label": "Login"
+      }
+    ]
+  %}
+    {% include "toolkit/breadcrumb.html" %}
+  {% endwith %}
+{% endblock %}
+
 {% block main_content %}
 
 {% with lede = "There was a problem with the details you gave for:" %}

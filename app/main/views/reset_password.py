@@ -34,8 +34,11 @@ PASSWORD_NOT_UPDATED_MESSAGE = "Could not update password due to an error."
 
 @main.route('/reset-password', methods=["GET"])
 def request_password_reset():
+    form = EmailAddressForm()
+    errors = get_errors_from_wtform(form)
     return render_template("auth/request-password-reset.html",
-                           form=EmailAddressForm()), 200
+                           errors=errors,
+                           form=form), 200
 
 
 @main.route('/reset-password', methods=["POST"])
@@ -97,6 +100,7 @@ def send_reset_password_email():
         return redirect(url_for('.request_password_reset'))
     else:
         return render_template("auth/request-password-reset.html",
+                               errors=get_errors_from_wtform(form),
                                form=form), 400
 
 
