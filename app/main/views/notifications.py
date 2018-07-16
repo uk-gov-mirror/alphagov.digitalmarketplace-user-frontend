@@ -2,11 +2,11 @@
 from flask_login import (current_user, login_required)
 from flask import (
     flash,
-    render_template,
     request,
     redirect
 )
 
+from dmutils.flask import timed_render_template as render_template
 from dmutils.forms import get_errors_from_wtform
 
 from .. import main

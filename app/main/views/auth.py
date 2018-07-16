@@ -6,13 +6,13 @@ from flask import (
     get_flashed_messages,
     Markup,
     redirect,
-    render_template,
     request,
     session,
     url_for
 )
 from flask_login import logout_user, login_user
 
+from dmutils.flask import timed_render_template as render_template
 from dmutils.forms import get_errors_from_wtform
 from dmutils.user import User
 from dmutils.email.helpers import hash_string
