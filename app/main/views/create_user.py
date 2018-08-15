@@ -1,4 +1,4 @@
-from flask import abort, current_app, Markup
+from flask import current_app, Markup
 from flask_login import login_user
 
 from dmapiclient import HTTPError
@@ -30,7 +30,10 @@ def create_user(encoded_token):
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
         )
-        abort(400, INVALID_TOKEN_MESSAGE)
+        return render_template(
+            "toolkit/errors/400.html",
+            error_message=INVALID_TOKEN_MESSAGE,
+        ), 400
 
     role = token["role"]
 
@@ -78,7 +81,10 @@ def submit_create_user(encoded_token):
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
         )
-        abort(400, INVALID_TOKEN_MESSAGE)
+        return render_template(
+            "toolkit/errors/400.html",
+            error_message=INVALID_TOKEN_MESSAGE,
+        ), 400
 
     role = token["role"]
 

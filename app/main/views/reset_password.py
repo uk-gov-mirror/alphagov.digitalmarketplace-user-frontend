@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import abort, current_app, flash, redirect, url_for, Markup
+from flask import current_app, flash, redirect, url_for, Markup
 from flask_login import current_user, login_required
 
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
@@ -79,7 +79,10 @@ def send_reset_password_email():
                     "login.reset-email.notify-error",
                     user.email_address
                 )
-                abort(503, response="Failed to send password reset.")
+                return render_template(
+                    'toolkit/errors/500.html',
+                    error_message="Failed to send password reset."
+                ), 503
 
             current_app.logger.info(
                 "{code}: Sending password reset email for email_hash {email_hash}",
