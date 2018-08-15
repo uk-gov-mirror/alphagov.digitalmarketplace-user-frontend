@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
 from dmutils.email.helpers import hash_string
 from dmutils.flask import timed_render_template as render_template
-from dmutils.forms import get_errors_from_wtform
+from dmutils.forms.helpers import get_errors_from_wtform
 from dmutils.user import User
 
 from .. import main

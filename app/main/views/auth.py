@@ -13,7 +13,7 @@ from flask import (
 from flask_login import logout_user, login_user
 
 from dmutils.flask import timed_render_template as render_template
-from dmutils.forms import get_errors_from_wtform
+from dmutils.forms.helpers import get_errors_from_wtform
 from dmutils.user import User
 from dmutils.email.helpers import hash_string
 
