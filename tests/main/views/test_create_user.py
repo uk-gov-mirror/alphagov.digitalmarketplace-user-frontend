@@ -644,7 +644,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
                 'name': 'valid name'
             }
         )
-        assert res.status_code == 500
+        assert res.status_code == 503
 
     def test_should_render_error_page_if_invalid_buyer_domain(self):
         self.data_api_client.create_user.side_effect = HTTPError(

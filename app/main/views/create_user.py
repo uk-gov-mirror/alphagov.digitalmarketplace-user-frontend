@@ -1,4 +1,4 @@
-from flask import current_app, Markup
+from flask import abort, current_app, Markup
 from flask_login import login_user
 
 from dmapiclient import HTTPError
@@ -140,6 +140,6 @@ def submit_create_user(encoded_token):
                 role=role,
                 token=None), 400
         else:
-            raise
+            abort(503)
 
     return redirect_logged_in_user(account_created=True)
