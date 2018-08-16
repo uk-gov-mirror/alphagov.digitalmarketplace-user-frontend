@@ -5,7 +5,7 @@ from wtforms import PasswordField, StringField
 from wtforms.validators import DataRequired, EqualTo, Length, Regexp, ValidationError
 
 from dmutils.email.helpers import hash_string
-from dmutils.forms import StripWhitespaceStringField
+from dmutils.forms.fields import DMStripWhitespaceStringField
 
 from app import data_api_client
 
@@ -18,8 +18,9 @@ PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we
 
 
 class LoginForm(FlaskForm):
-    email_address = StripWhitespaceStringField(
+    email_address = DMStripWhitespaceStringField(
         'Email address', id="input_email_address",
+        hint=EMAIL_LOGIN_HINT,
         validators=[
             DataRequired(message="You must provide an email address"),
             Regexp(EMAIL_REGEX,
@@ -33,24 +34,17 @@ class LoginForm(FlaskForm):
         ]
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.email_address.hint = EMAIL_LOGIN_HINT
-
 
 class EmailAddressForm(FlaskForm):
-    email_address = StripWhitespaceStringField(
+    email_address = DMStripWhitespaceStringField(
         'Email address', id="input_email_address",
+        hint=EMAIL_LOGIN_HINT,
         validators=[
             DataRequired(message="You must provide an email address"),
             Regexp(EMAIL_REGEX,
                    message="You must provide a valid email address")
         ]
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.email_address.hint = EMAIL_LOGIN_HINT
 
 
 class MatchesCurrentPassword:
@@ -107,7 +101,7 @@ class PasswordResetForm(PasswordChangeForm):
 
 
 class CreateUserForm(FlaskForm):
-    name = StripWhitespaceStringField(
+    name = DMStripWhitespaceStringField(
         'Your name', id="input_name",
         validators=[
             DataRequired(message="You must enter a name"),

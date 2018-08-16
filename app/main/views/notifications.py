@@ -7,7 +7,7 @@ from flask import (
 )
 
 from dmutils.flask import timed_render_template as render_template
-from dmutils.forms import get_errors_from_wtform
+from dmutils.forms.helpers import get_errors_from_wtform
 
 from .. import main
 from ..forms.user_research import UserResearchOptInForm

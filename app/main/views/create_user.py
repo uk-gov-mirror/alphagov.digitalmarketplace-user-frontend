@@ -4,7 +4,7 @@ from flask_login import login_user
 from dmapiclient import HTTPError
 from dmutils.email import decode_invitation_token
 from dmutils.flask import timed_render_template as render_template
-from dmutils.forms import get_errors_from_wtform
+from dmutils.forms.helpers import get_errors_from_wtform
 from dmutils.user import User
 
 from .. import main
@@ -30,7 +30,10 @@ def create_user(encoded_token):
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
         )
-        abort(400, INVALID_TOKEN_MESSAGE)
+        return render_template(
+            "toolkit/errors/400.html",
+            error_message=INVALID_TOKEN_MESSAGE,
+        ), 400
 
     role = token["role"]
 
@@ -78,7 +81,10 @@ def submit_create_user(encoded_token):
             "createuser.token_invalid: {encoded_token}",
             extra={'encoded_token': encoded_token}
         )
-        abort(400, INVALID_TOKEN_MESSAGE)
+        return render_template(
+            "toolkit/errors/400.html",
+            error_message=INVALID_TOKEN_MESSAGE,
+        ), 400
 
     role = token["role"]
 
@@ -134,6 +140,6 @@ def submit_create_user(encoded_token):
                 role=role,
                 token=None), 400
         else:
-            raise
+            abort(503)
 
     return redirect_logged_in_user(account_created=True)
