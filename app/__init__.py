@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, session, abort
 from flask_login import LoginManager
-from flask_wtf.csrf import CsrfProtect, CSRFError
+from flask_wtf.csrf import CSRFProtect
 
 import dmapiclient
 from dmutils import init_app, flask_featureflags
@@ -13,7 +13,7 @@ from config import configs
 login_manager = LoginManager()
 data_api_client = dmapiclient.DataAPIClient()
 feature_flags = flask_featureflags.FeatureFlag()
-csrf = CsrfProtect()
+csrf = CSRFProtect()
 
 
 def create_app(config_name):
@@ -40,21 +40,6 @@ def create_app(config_name):
     login_manager.login_view = 'main.render_login'
     login_manager.login_message_category = "must_login"
     csrf.init_app(application)
-
-    @application.errorhandler(CSRFError)
-    def csrf_handler(reason):
-        if 'user_id' not in session:
-            application.logger.info(
-                u'csrf.session_expired: Redirecting user to log in page'
-            )
-
-            return application.login_manager.unauthorized()
-
-        application.logger.info(
-            u'csrf.invalid_token: Aborting request, user_id: {user_id}',
-            extra={'user_id': session['user_id']})
-
-        abort(400, reason)
 
     @application.before_request
     def remove_trailing_slash():
