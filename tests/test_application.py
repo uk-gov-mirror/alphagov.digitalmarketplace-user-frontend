@@ -13,9 +13,9 @@ class TestApplication(BaseApplicationTest):
         response = self.client.get('/not-found')
         assert 404 == response.status_code
 
-    @mock.patch('app.main.auth.current_user')
-    def test_503_renders_shared_error_template(self, current_user):
-        current_user.is_authenticated.side_effect = ServiceUnavailable()
+    @mock.patch('app.main.auth.get_errors_from_wtform')
+    def test_503_renders_shared_error_template(self, get_errors):
+        get_errors.side_effect = ServiceUnavailable()
         self.app.config['DEBUG'] = False
 
         res = self.client.get('/user/login')
@@ -41,9 +41,9 @@ class TestApplication(BaseApplicationTest):
         assert 200 == res.status_code
         assert 'DENY', res.headers['X-Frame-Options']
 
-    @mock.patch('app.main.auth.current_user')
-    def test_non_csrf_400(self, current_user):
-        current_user.is_authenticated.side_effect = BadRequest()
+    @mock.patch('app.main.auth.get_errors_from_wtform')
+    def test_non_csrf_400(self, get_errors):
+        get_errors.side_effect = BadRequest()
 
         res = self.client.get('/user/login')
 

@@ -31,7 +31,7 @@ NO_ACCOUNT_MESSAGE = Markup("""Make sure you've entered the right email address 
 @main.route('/login', methods=["GET"])
 def render_login():
     next_url = request.args.get('next')
-    if current_user.is_authenticated() and not get_flashed_messages():
+    if current_user.is_authenticated and not get_flashed_messages():
         return redirect_logged_in_user(next_url)
 
     form = LoginForm()
