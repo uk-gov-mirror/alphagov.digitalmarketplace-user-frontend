@@ -66,7 +66,7 @@ def send_reset_password_email():
             try:
                 notify_client.send_email(
                     user.email_address,
-                    template_id=current_app.config['NOTIFY_TEMPLATES']['reset_password'],
+                    template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['reset_password'],
                     personalisation={
                         'url': url_for('main.reset_password', token=token, _external=True),
                     },
@@ -184,7 +184,7 @@ def change_password():
             try:
                 notify_client.send_email(
                     current_user.email_address,
-                    template_id=current_app.config['NOTIFY_TEMPLATES']['change_password_alert'],
+                    template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['change_password_alert'],
                     personalisation={
                         'url': url_for('main.reset_password', token=token, _external=True),
                     },
