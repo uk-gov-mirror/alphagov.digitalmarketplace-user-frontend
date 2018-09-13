@@ -236,7 +236,7 @@ class TestResetPassword(BaseApplicationTest):
         assert len(error_elements) == 1
         assert reset_password.EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE in error_elements[0].text_content()
 
-    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
     def test_should_call_send_email_with_correct_params(self, send_email):
         res = self.client.post(
             '/user/reset-password',
@@ -245,8 +245,9 @@ class TestResetPassword(BaseApplicationTest):
 
         assert res.status_code == 302
         send_email.assert_called_once_with(
+            mock.ANY,  # self
             "email@email.com",
-            template_id=self.app.config['NOTIFY_TEMPLATES']['reset_password'],
+            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password'],
             personalisation={
                 'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
             },
@@ -348,7 +349,7 @@ class TestChangePassword(BaseApplicationTest):
             ('admin', '/admin', 'admin@email.com')
         ]
     )
-    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
     def test_user_can_change_password(self, send_email, user_role, redirect_url, user_email):
         if user_role == 'buyer':
             self.login_as_buyer()
@@ -371,8 +372,9 @@ class TestChangePassword(BaseApplicationTest):
         self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE)
 
         send_email.assert_called_once_with(
+            mock.ANY,  # self
             user_email,
-            template_id=self.app.config['NOTIFY_TEMPLATES']['change_password_alert'],
+            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['change_password_alert'],
             personalisation={
                 'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
             },
