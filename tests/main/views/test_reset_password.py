@@ -12,7 +12,8 @@ from app.main.views import reset_password
 EMAIL_EMPTY_ERROR = "You must provide an email address"
 EMAIL_INVALID_ERROR = "You must provide a valid email address"
 
-PASSWORD_INVALID_ERROR = "Passwords must be between 10 and 50 characters"
+PASSWORD_INVALID_LENGTH_ERROR = "Passwords must be between 10 and 50 characters"
+PASSWORD_INVALID_BLACKLISTED_ERROR = "Your password must be hard to guess"
 PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
@@ -132,7 +133,22 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': '123456789'
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+
+    @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
+    def test_password_should_not_be_in_blacklist(self, bad_password):
+        token = generate_token(
+            self._user,
+            self.app.config['SHARED_EMAIL_KEY'],
+            self.app.config['RESET_PASSWORD_SALT'])
+        url = '/user/reset-password/{}'.format(token)
+
+        res = self.client.post(url, data={
+            'password': bad_password,
+            'confirm_password': bad_password,
+        })
+        assert res.status_code == 400
+        assert PASSWORD_INVALID_BLACKLISTED_ERROR in res.get_data(as_text=True)
 
     def test_password_should_be_under_51_chars_long(self):
         token = generate_token(
@@ -148,7 +164,7 @@ class TestResetPassword(BaseApplicationTest):
                 '123456789012345678901234567890123456789012345678901'
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
 
     def test_passwords_should_match(self):
         token = generate_token(
@@ -158,8 +174,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '1234567890',
-            'confirm_password': '0123456789'
+            'password': '123456789o',
+            'confirm_password': 'o123456789'
         })
         assert res.status_code == 400
         assert PASSWORD_MISMATCH_ERROR in res.get_data(as_text=True)
@@ -172,8 +188,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '1234567890',
-            'confirm_password': '1234567890'
+            'password': '123456789o',
+            'confirm_password': '123456789o'
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
@@ -190,8 +206,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '1234567890',
-            'confirm_password': '1234567890'
+            'password': '123456789o',
+            'confirm_password': '123456789o'
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
@@ -208,11 +224,11 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         self.client.post(url, data={
-            'password': '  1234567890',
-            'confirm_password': '  1234567890'
+            'password': '  123456789o',
+            'confirm_password': '  123456789o'
         })
         self.data_api_client.update_user_password.assert_called_with(
-            self._user.get('user'), '  1234567890', self._user.get('email'))
+            self._user.get('user'), '  123456789o', self._user.get('email'))
 
     def test_token_created_before_last_updated_password_cannot_be_used(self):
         self.data_api_client.get_user.return_value = self.user(
@@ -225,8 +241,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '1234567890',
-            'confirm_password': '1234567890'
+            'password': '123456789o',
+            'confirm_password': '123456789o'
         }, follow_redirects=True)
 
         assert res.status_code == 200
@@ -360,15 +376,15 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '0987654321',
-                'confirm_password': '0987654321'
+                'old_password': '123456789o',
+                'password': 'o987654321',
+                'confirm_password': 'o987654321'
             }
         )
         assert response.status_code == 302
         assert response.location == 'http://localhost{}'.format(redirect_url)
 
-        self.data_api_client.update_user_password.assert_called_once_with(123, '0987654321', updater=user_email)
+        self.data_api_client.update_user_password.assert_called_once_with(123, 'o987654321', updater=user_email)
         self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE)
 
         send_email.assert_called_once_with(
@@ -387,9 +403,9 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '0987654321',
-                'password': '1234567890',
-                'confirm_password': '1234567890'
+                'old_password': 'o987654321',
+                'password': '123456789o',
+                'confirm_password': '123456789o'
             }
         )
         assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR) \
@@ -401,35 +417,49 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '09876',
-                'confirm_password': '09876'
+                'old_password': '123456789o',
+                'password': 'o9876',
+                'confirm_password': 'o9876'
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_INVALID_LENGTH_ERROR in response.get_data(as_text=True)
+
+    @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
+    def test_new_password_shouldnt_be_in_blacklist(self, bad_password):
+        self.login_as_supplier()
+        response = self.client.post(
+            '/user/change-password',
+            data={
+                'old_password': '123456789o',
+                'password': bad_password,
+                'confirm_password': bad_password,
+            }
+        )
+        assert response.status_code == 400
+        assert PASSWORD_INVALID_BLACKLISTED_ERROR in response.get_data(as_text=True)
 
     def test_password_should_be_under_51_chars_long(self):
         self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '0' * 51,
-                'confirm_password': '0' * 51
+                'old_password': '123456789o',
+                'password': 'o' * 51,
+                'confirm_password': 'o' * 51
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_INVALID_LENGTH_ERROR in response.get_data(as_text=True)
 
     def test_passwords_should_match(self):
         self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '0987654321',
-                'confirm_password': '0000000000'
+                'old_password': '123456789o',
+                'password': 'o987654321',
+                'confirm_password': '123456789o'
             }
         )
         assert response.status_code == 400
@@ -439,9 +469,9 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '0987654321',
-                'confirm_password': '0987654321'
+                'old_password': '123456789o',
+                'password': 'o987654321',
+                'confirm_password': 'o987654321'
             }
         )
         assert response.status_code == 302
@@ -453,9 +483,9 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '0987654321',
-                'confirm_password': '0987654321'
+                'old_password': '123456789o',
+                'password': 'o987654321',
+                'confirm_password': 'o987654321'
             }
         )
         assert response.status_code == 302
@@ -471,9 +501,9 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '1234567890',
-                'password': '0987654321',
-                'confirm_password': '0987654321'
+                'old_password': '123456789o',
+                'password': 'o987654321',
+                'confirm_password': 'o987654321'
             }
         )
 
