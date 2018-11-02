@@ -105,6 +105,7 @@ class TestResetPassword(BaseApplicationTest):
 
         for label in ['New password', 'Confirm new password']:
             assert label in form_labels
+        assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_not_be_empty(self):
         token = generate_token(
@@ -120,6 +121,7 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 400
         assert NEW_PASSWORD_EMPTY_ERROR in res.get_data(as_text=True)
         assert NEW_PASSWORD_CONFIRM_EMPTY_ERROR in res.get_data(as_text=True)
+        assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_over_ten_chars_long(self):
         token = generate_token(
@@ -134,6 +136,7 @@ class TestResetPassword(BaseApplicationTest):
         })
         assert res.status_code == 400
         assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+        assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
     def test_password_should_not_be_in_blacklist(self, bad_password):
@@ -149,6 +152,7 @@ class TestResetPassword(BaseApplicationTest):
         })
         assert res.status_code == 400
         assert PASSWORD_INVALID_BLACKLISTED_ERROR in res.get_data(as_text=True)
+        assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_under_51_chars_long(self):
         token = generate_token(
@@ -165,6 +169,7 @@ class TestResetPassword(BaseApplicationTest):
         })
         assert res.status_code == 400
         assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+        assert self.data_api_client.update_user_password.called is False
 
     def test_passwords_should_match(self):
         token = generate_token(
@@ -179,6 +184,7 @@ class TestResetPassword(BaseApplicationTest):
         })
         assert res.status_code == 400
         assert PASSWORD_MISMATCH_ERROR in res.get_data(as_text=True)
+        assert self.data_api_client.update_user_password.called is False
 
     def test_redirect_to_login_page_on_success(self):
         token = generate_token(
@@ -196,6 +202,8 @@ class TestResetPassword(BaseApplicationTest):
         res = self.client.get(res.location)
 
         assert reset_password.PASSWORD_UPDATED_MESSAGE in res.get_data(as_text=True)
+        self.data_api_client.update_user_password.assert_called_with(
+            self._user.get('user'), '123456789o', self._user.get('email'))
 
     def test_password_change_unknown_failure(self):
         self.data_api_client.update_user_password.return_value = False
@@ -214,7 +222,8 @@ class TestResetPassword(BaseApplicationTest):
         res = self.client.get(res.location)
 
         assert reset_password.PASSWORD_NOT_UPDATED_MESSAGE in res.get_data(as_text=True)
-        self.data_api_client.update_user_password.return_value = True
+        self.data_api_client.update_user_password.assert_called_with(
+            self._user.get('user'), '123456789o', self._user.get('email'))
 
     def test_should_not_strip_whitespace_surrounding_reset_password_password_field(self):
         token = generate_token(
@@ -251,6 +260,7 @@ class TestResetPassword(BaseApplicationTest):
         error_elements = error_selector(document)
         assert len(error_elements) == 1
         assert reset_password.EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE in error_elements[0].text_content()
+        assert self.data_api_client.update_user_password.called is False
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
     def test_should_call_send_email_with_correct_params(self, send_email):
