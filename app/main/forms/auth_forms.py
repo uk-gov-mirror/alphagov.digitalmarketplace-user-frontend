@@ -13,14 +13,17 @@ from dmutils.forms.fields import DMStripWhitespaceStringField
 from app import data_api_client
 
 
+PASSWORD_MIN_LENGTH = 10
+PASSWORD_MAX_LENGTH = 50
+
+
 EMAIL_REGEX = "^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
-PASSWORD_HINT = "Must be between 10 and 50 characters"
+PASSWORD_HINT = f"Must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_LENGTH_ERROR_MESSAGE = f"Passwords must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Your password must be hard to guess"
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."
-
-
-PASSWORD_MIN_LENGTH = 10
 
 
 class NotInPasswordBlacklist:
@@ -124,10 +127,10 @@ class PasswordChangeForm(FlaskForm):
             DataRequired(message="You must enter a new password"),
             Length(
                 min=PASSWORD_MIN_LENGTH,
-                max=50,
-                message=f"Passwords must be between {PASSWORD_MIN_LENGTH} and 50 characters",
+                max=PASSWORD_MAX_LENGTH,
+                message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message="Your password must be hard to guess"),
+            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
         ]
     )
     confirm_password = PasswordField(
@@ -179,10 +182,10 @@ class CreateUserForm(FlaskForm):
             DataRequired(message="You must enter a password"),
             Length(
                 min=PASSWORD_MIN_LENGTH,
-                max=50,
-                message=f"Passwords must be between {PASSWORD_MIN_LENGTH} and 50 characters",
+                max=PASSWORD_MAX_LENGTH,
+                message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message="Your password must be hard to guess"),
+            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
         ]
     )
 
