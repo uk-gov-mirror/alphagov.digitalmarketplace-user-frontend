@@ -1,3 +1,6 @@
+from itertools import chain
+from pathlib import Path
+
 from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
@@ -10,11 +13,60 @@ from dmutils.forms.fields import DMStripWhitespaceStringField
 from app import data_api_client
 
 
+PASSWORD_MIN_LENGTH = 10
+PASSWORD_MAX_LENGTH = 50
+
+
 EMAIL_REGEX = "^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
-PASSWORD_HINT = "Must be between 10 and 50 characters"
+PASSWORD_HINT = f"Must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_LENGTH_ERROR_MESSAGE = f"Passwords must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Your password must be hard to guess"
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."
+
+
+class NotInPasswordBlacklist:
+    # path, relative to flask app root_path, to look for password blacklist files. all files found here will be read,
+    # one password per line
+    BLACKLIST_DIR_PATH = "data/password_blacklist"
+
+    @staticmethod
+    def _normalized_password(password):
+        return password.strip().lower()
+
+    @classmethod
+    def _lines_from_filepath(cls, filepath):
+        with filepath.open("r", encoding="utf-8") as f:
+            # we exclude passwords that can't be used anyway as they fall short of the minimum password length - doing
+            # this allows us to keep "original" password lists in the blacklist dir without modification, making them
+            # easier to maintain yet still memory-efficient.
+            return tuple(
+                password
+                for password in (cls._normalized_password(line) for line in f)
+                if len(password) >= PASSWORD_MIN_LENGTH
+            )
+
+    # this value is not populated until first access because construction depends on current_app being available
+    _blacklist_set = None
+
+    @classmethod
+    def get_blacklist_set(cls):
+        # cache blacklist set class-wide
+        if cls._blacklist_set is None:
+            cls._blacklist_set = frozenset(chain.from_iterable(
+                cls._lines_from_filepath(filepath)
+                for filepath in (Path(current_app.root_path) / cls.BLACKLIST_DIR_PATH).iterdir()
+                if filepath.is_file()
+            ))
+        return cls._blacklist_set
+
+    def __init__(self, message):
+        self.message = message
+
+    def __call__(self, form, field):
+        if self._normalized_password(field.data) in self.get_blacklist_set():
+            raise ValidationError(self.message)
 
 
 class LoginForm(FlaskForm):
@@ -73,10 +125,12 @@ class PasswordChangeForm(FlaskForm):
         'New password', id="input_password",
         validators=[
             DataRequired(message="You must enter a new password"),
-            Length(min=10,
-                   max=50,
-                   message="Passwords must be between 10 and 50 characters"
-                   )
+            Length(
+                min=PASSWORD_MIN_LENGTH,
+                max=PASSWORD_MAX_LENGTH,
+                message=PASSWORD_LENGTH_ERROR_MESSAGE,
+            ),
+            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
         ]
     )
     confirm_password = PasswordField(
@@ -126,10 +180,12 @@ class CreateUserForm(FlaskForm):
         'Password', id="input_password",
         validators=[
             DataRequired(message="You must enter a password"),
-            Length(min=10,
-                   max=50,
-                   message="Passwords must be between 10 and 50 characters"
-                   )
+            Length(
+                min=PASSWORD_MIN_LENGTH,
+                max=PASSWORD_MAX_LENGTH,
+                message=PASSWORD_LENGTH_ERROR_MESSAGE,
+            ),
+            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
         ]
     )
 
