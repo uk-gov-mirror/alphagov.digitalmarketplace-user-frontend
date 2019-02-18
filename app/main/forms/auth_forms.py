@@ -17,7 +17,7 @@ PASSWORD_MIN_LENGTH = 10
 PASSWORD_MAX_LENGTH = 50
 
 
-EMAIL_REGEX = "^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
+EMAIL_REGEX = r"^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
 PASSWORD_HINT = f"Must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_LENGTH_ERROR_MESSAGE = f"Passwords must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
