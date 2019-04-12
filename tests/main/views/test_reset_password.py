@@ -305,6 +305,25 @@ class TestResetPassword(BaseApplicationTest):
             )
         ]
 
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
+    def test_inactive_user_attempts_password_reset(self, send_email):
+        self.data_api_client.get_user.return_value = self.user(
+            123, "email@email.com", 1234, 'email', 'Name', active=False,
+        )
+        res = self.client.post(
+            '/user/reset-password',
+            data={'email_address': 'email@email.com'}
+        )
+
+        assert res.status_code == 302
+        self.assert_flashes(reset_password.EMAIL_SENT_MESSAGE, expected_category='message')
+        send_email.assert_called_once_with(
+            mock.ANY,  # self
+            "email@email.com",
+            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password_inactive'],
+            reference='reset-password-inactive-8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
+        )
+
 
 class TestChangePassword(BaseApplicationTest):
 
