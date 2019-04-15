@@ -50,47 +50,72 @@ def send_reset_password_email():
         user_json = data_api_client.get_user(email_address=email_address)
 
         if user_json is not None:
-
             user = User.from_json(user_json)
-
-            token = generate_token(
-                {
-                    "user": user.id
-                },
-                current_app.config['SHARED_EMAIL_KEY'],
-                current_app.config['RESET_PASSWORD_SALT']
-            )
-
             notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
 
-            try:
-                notify_client.send_email(
-                    user.email_address,
-                    template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['reset_password'],
-                    personalisation={
-                        'url': url_for('main.reset_password', token=token, _external=True),
+            if user.active:  # specifically checking just .active, ignoring whether account is "locked"
+                token = generate_token(
+                    {
+                        "user": user.id
                     },
-                    reference='reset-password-{}'.format(hash_string(user.email_address))
+                    current_app.config['SHARED_EMAIL_KEY'],
+                    current_app.config['RESET_PASSWORD_SALT']
                 )
-            except EmailError as exc:
-                log_email_error(
-                    exc,
-                    "Password reset",
-                    "login.reset-email.notify-error",
-                    user.email_address
-                )
-                return render_template(
-                    'toolkit/errors/500.html',
-                    error_message="Failed to send password reset."
-                ), 503
 
-            current_app.logger.info(
-                "{code}: Sending password reset email for email_hash {email_hash}",
-                extra={
-                    'email_hash': hash_string(user.email_address),
-                    'code': 'login.reset-email.sent'
-                }
-            )
+                try:
+                    notify_client.send_email(
+                        user.email_address,
+                        template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['reset_password'],
+                        personalisation={
+                            'url': url_for('main.reset_password', token=token, _external=True),
+                        },
+                        reference='reset-password-{}'.format(hash_string(user.email_address)),
+                    )
+                except EmailError as exc:
+                    log_email_error(
+                        exc,
+                        "Password reset",
+                        "login.reset-email.notify-error",
+                        user.email_address,
+                    )
+                    return render_template(
+                        'toolkit/errors/500.html',
+                        error_message="Failed to send password reset.",
+                    ), 503
+
+                current_app.logger.info(
+                    "{code}: Sending password reset email for email_hash {email_hash}",
+                    extra={
+                        'email_hash': hash_string(user.email_address),
+                        'code': 'login.reset-email.sent'
+                    }
+                )
+            else:
+                try:
+                    notify_client.send_email(
+                        user.email_address,
+                        template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['reset_password_inactive'],
+                        reference='reset-password-inactive-{}'.format(hash_string(user.email_address)),
+                    )
+                except EmailError as exc:
+                    log_email_error(
+                        exc,
+                        "Password reset (inactive user)",
+                        "login.reset-email-inactive.notify-error",
+                        user.email_address,
+                    )
+                    return render_template(
+                        'toolkit/errors/500.html',
+                        error_message="Failed to send password reset.",
+                    ), 503
+
+                current_app.logger.warning(
+                    "{code}: Sending password (non-)reset email for inactive user email_hash {email_hash}",
+                    extra={
+                        'email_hash': hash_string(user.email_address),
+                        'code': 'login.reset-email-inactive.sent',
+                    }
+                )
         else:
             current_app.logger.info(
                 "{code}: Password reset request for invalid email_hash {email_hash}",
