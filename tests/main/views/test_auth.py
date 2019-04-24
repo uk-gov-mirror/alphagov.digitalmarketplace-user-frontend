@@ -79,6 +79,12 @@ class TestLogin(BaseApplicationTest):
         assert res.status_code == 302
         assert res.location == 'http://localhost/admin'
 
+    def test_should_redirect_to_next_url_absolutized(self):
+        self.login_as_supplier()
+        res = self.client.get("/user/login?next=dolphinsbarn")
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/dolphinsbarn'
+
     def test_should_redirect_to_next_url_for_simple_auth_uri(self):
         self.login_as_supplier()
         res = self.client.get("/user/login?next=@example.com")
