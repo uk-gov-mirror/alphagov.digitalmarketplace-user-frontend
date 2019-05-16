@@ -27,8 +27,10 @@ def create_app(config_name):
         login_manager=login_manager,
     )
 
+    from .metrics import metrics as metrics_blueprint, gds_metrics
     from .main import main as main_blueprint
 
+    application.register_blueprint(metrics_blueprint, url_prefix='/user')
     application.register_blueprint(main_blueprint, url_prefix='/user')
 
     # Must be registered last so that any routes declared in the app are registered first (i.e. take precedence over
@@ -37,6 +39,7 @@ def create_app(config_name):
 
     login_manager.login_view = 'main.render_login'
     login_manager.login_message_category = "must_login"
+    gds_metrics.init_app(application)
     csrf.init_app(application)
 
     @application.before_request

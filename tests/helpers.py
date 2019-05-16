@@ -19,12 +19,16 @@ class BaseApplicationTest(object):
         # as the DataAPIClient instance has already been created; nor can we temporarily replace app.data_api_client
         # with a mock, because then the shared instance won't have been configured (done in create_app). Instead,
         # just mock the one function that would make an API call in this case.
+        self.app_env_var_mock = patch.dict('gds_metrics.os.environ', {'PROMETHEUS_METRICS_PATH': '/_metrics'})
+        self.app_env_var_mock.start()
+
         self.app = create_app('test')
         self.client = self.app.test_client()
         self.get_user_patch = None
 
     def teardown_method(self, method):
         self.teardown_login()
+        self.app_env_var_mock.stop()
 
     @staticmethod
     def user(id, email_address, supplier_id, supplier_name, name,
