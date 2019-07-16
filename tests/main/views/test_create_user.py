@@ -9,8 +9,6 @@ from dmutils.email import generate_token
 
 from ...helpers import BaseApplicationTest
 
-from app.main.views.create_user import INVALID_TOKEN_MESSAGE
-
 
 class TestCreateUser(BaseApplicationTest):
 
@@ -65,7 +63,7 @@ class TestCreateUser(BaseApplicationTest):
             )
 
             assert res.status_code == 400
-            assert INVALID_TOKEN_MESSAGE in res.get_data(as_text=True)
+            assert "The link you used to create an account is not valid." in res.get_data(as_text=True)
 
     def test_invalid_token_contents_500s(self):
         token = generate_token(
@@ -349,7 +347,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
 
             assert res.status_code == 400
             assert 'Bad request - Digital Marketplace' in res.get_data(as_text=True)
-            assert INVALID_TOKEN_MESSAGE in res.get_data(as_text=True)
+            assert "The link you used to create an account is not valid." in res.get_data(as_text=True)
 
     def test_should_be_a_bad_request_if_token_expired(self):
         for role in self.user_roles:

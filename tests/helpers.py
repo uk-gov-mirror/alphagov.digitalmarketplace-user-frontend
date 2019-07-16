@@ -250,7 +250,7 @@ class BaseApplicationTest(object):
                 category, message = session['_flashes'][0]
             except KeyError:
                 raise AssertionError('nothing flashed')
-            assert expected_message in message
+            assert expected_message in message, message
             assert expected_category == category
 
     def assert_breadcrumbs(self, response, extra_breadcrumbs=None):

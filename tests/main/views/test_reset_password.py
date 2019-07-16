@@ -79,7 +79,7 @@ class TestResetPassword(BaseApplicationTest):
         }, follow_redirects=True)
         assert res.status_code == 200
         content = self.strip_all_whitespace(res.get_data(as_text=True))
-        assert self.strip_all_whitespace(reset_password.EMAIL_SENT_MESSAGE) in content
+        assert self.strip_all_whitespace("we'll send a link to reset the password") in content
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_should_strip_whitespace_surrounding_reset_password_email_address_field(self, send_email):
@@ -316,7 +316,8 @@ class TestResetPassword(BaseApplicationTest):
         )
 
         assert res.status_code == 302
-        self.assert_flashes(reset_password.EMAIL_SENT_MESSAGE, expected_category='message')
+        # Asserting the whole flash message is a bit messy due to line breaks
+        self.assert_flashes("we'll send a link to reset the", expected_category='message')
         send_email.assert_called_once_with(
             mock.ANY,  # self
             "email@email.com",
