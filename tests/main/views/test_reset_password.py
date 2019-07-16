@@ -325,6 +325,22 @@ class TestResetPassword(BaseApplicationTest):
             reference='reset-password-inactive-8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
         )
 
+    @mock.patch("app.main.views.reset_password.DMNotifyClient.send_email", autospec=True)
+    def test_admin_manager_does_not_get_reset_email(self, send_email):
+        self.data_api_client.get_user.return_value = self.user(
+            123, "email@email.com", name="Eve", role="admin-manager",
+            supplier_id=None, supplier_name=None,
+        )
+        res = self.client.post(
+            "/user/reset-password",
+            data={"email_address": "email@email.com"}
+        )
+
+        # to prevent revealing email addresses for admins we still show the usual result
+        assert res.status_code == 302
+        self.assert_flashes("we'll send a link to reset the", expected_category='message')
+        send_email.assert_not_called()
+
 
 class TestChangePassword(BaseApplicationTest):
 

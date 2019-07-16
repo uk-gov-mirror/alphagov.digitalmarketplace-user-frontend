@@ -52,7 +52,18 @@ def send_reset_password_email():
             user = User.from_json(user_json)
             notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
 
-            if user.active:  # specifically checking just .active, ignoring whether account is "locked"
+            if user.role in ("admin-manager"):
+                # if this user wants their password reset they'll have to come to us
+                current_app.logger.warning(
+                    "{code}: Password reset requested for {user_role} user '{email_hash}'",
+                    extra={
+                        "code": "login.reset-email.bad-role",
+                        "email_hash": hash_string(user.email_address),
+                        "user_role": user.role,
+                    }
+                )
+
+            elif user.active:  # specifically checking just .active, ignoring whether account is "locked"
                 token = generate_token(
                     {
                         "user": user.id
