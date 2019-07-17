@@ -30,6 +30,7 @@ class Config(object):
         "change_password_alert": "1c4c0562-44aa-4ae4-ba61-e17c544df535",
         "reset_password_inactive": "6c522c78-e4d2-488f-aa5f-6f42401ef2c5",
     }
+    SUPPORT_EMAIL_ADDRESS = "cloud_digital@crowncommercial.gov.uk"
 
     DEBUG = False
 

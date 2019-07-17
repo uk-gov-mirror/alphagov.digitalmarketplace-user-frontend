@@ -16,7 +16,7 @@ from ... import data_api_client
 INVALID_TOKEN_MESSAGE = Markup(
     """The link you used to create an account is not valid. Check you’ve entered the correct link.
     If you still can’t create an account, email
-    <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>
+    <a href="mailto:{support_email}">{support_email}</a>
     """
 )
 
@@ -32,7 +32,7 @@ def create_user(encoded_token):
         )
         return render_template(
             "toolkit/errors/400.html",
-            error_message=INVALID_TOKEN_MESSAGE,
+            error_message=INVALID_TOKEN_MESSAGE.format(support_email=current_app.config['SUPPORT_EMAIL_ADDRESS']),
         ), 400
 
     role = token["role"]
@@ -45,6 +45,7 @@ def create_user(encoded_token):
         return render_template(
             "auth/create-user-error.html",
             error=None,
+            support_email_address=current_app.config['SUPPORT_EMAIL_ADDRESS'],
             role=role,
             token=None,
             user=None), 400
@@ -67,6 +68,7 @@ def create_user(encoded_token):
     return render_template(
         "auth/create-user-error.html",
         error=None,
+        support_email_address=current_app.config['SUPPORT_EMAIL_ADDRESS'],
         role=role,
         token=token,
         user=user), 400
@@ -83,7 +85,7 @@ def submit_create_user(encoded_token):
         )
         return render_template(
             "toolkit/errors/400.html",
-            error_message=INVALID_TOKEN_MESSAGE,
+            error_message=INVALID_TOKEN_MESSAGE.format(support_email=current_app.config['SUPPORT_EMAIL_ADDRESS']),
         ), 400
 
     role = token["role"]
@@ -96,6 +98,7 @@ def submit_create_user(encoded_token):
         return render_template(
             "auth/create-user-error.html",
             error=None,
+            support_email_address=current_app.config['SUPPORT_EMAIL_ADDRESS'],
             role=role,
             token=None,
             user=None), 400
@@ -137,6 +140,7 @@ def submit_create_user(encoded_token):
             return render_template(
                 "auth/create-user-error.html",
                 error=e.message,
+                support_email_address=current_app.config['SUPPORT_EMAIL_ADDRESS'],
                 role=role,
                 token=None), 400
         else:

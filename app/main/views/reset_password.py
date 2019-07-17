@@ -18,8 +18,7 @@ from ... import data_api_client
 
 EMAIL_SENT_MESSAGE = Markup(
     """If the email address you've entered belongs to a Digital Marketplace account, we'll send a link to reset the
-    password. If you don’t receive this, email
-    <a href="mailto:enquiries@digitalmarketplace.service.gov.uk">enquiries@digitalmarketplace.service.gov.uk</a>.
+    password. If you don’t receive this, email <a href="mailto:{support_email}">{support_email}</a>.
     """
 )
 
@@ -125,7 +124,7 @@ def send_reset_password_email():
                 }
             )
 
-        flash(EMAIL_SENT_MESSAGE)
+        flash(EMAIL_SENT_MESSAGE.format(support_email=current_app.config['SUPPORT_EMAIL_ADDRESS']))
         return redirect(url_for('.request_password_reset'))
     else:
         return render_template("auth/request-password-reset.html",
