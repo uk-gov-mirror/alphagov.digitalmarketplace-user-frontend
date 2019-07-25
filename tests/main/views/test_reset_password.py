@@ -262,8 +262,20 @@ class TestResetPassword(BaseApplicationTest):
         assert reset_password.EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE in error_elements[0].text_content()
         assert self.data_api_client.update_user_password.called is False
 
+    @pytest.mark.parametrize("user_role", (
+        "admin",
+        "admin-ccs-category",
+        "admin-ccs-sourcing",
+        "admin-ccs-data-controller",
+        "admin-framework-manager",
+        "buyer",
+        "supplier",
+    ))
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
-    def test_should_call_send_email_with_correct_params(self, send_email):
+    def test_should_call_send_email_with_correct_params(self, send_email, user_role):
+        self.data_api_client.get_user.return_value = self.user(
+            123, "email@email.com", 1234, "Ahoy", name="Bob", role=user_role,
+        )
         res = self.client.post(
             '/user/reset-password',
             data={'email_address': 'email@email.com'}
