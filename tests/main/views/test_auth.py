@@ -37,7 +37,7 @@ class TestLogin(BaseApplicationTest):
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/suppliers'
-        assert 'Secure;' in res.headers['Set-Cookie']
+        assert any('Secure;' in c for c in res.headers.getlist('Set-Cookie'))
 
     def test_should_redirect_to_homepage_on_buyer_login(self):
         self.data_api_client.authenticate_user.return_value = self.user(123, "email@email.com", None, None, 'Name')
@@ -47,7 +47,7 @@ class TestLogin(BaseApplicationTest):
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/'
-        assert 'Secure;' in res.headers['Set-Cookie']
+        assert any('Secure;' in c for c in res.headers.getlist('Set-Cookie'))
 
     def test_should_redirect_logged_in_supplier_to_supplier_dashboard(self):
         self.login_as_supplier()
@@ -166,7 +166,7 @@ class TestLogin(BaseApplicationTest):
 
         properties = ['Secure', 'HttpOnly', 'Domain=127.0.0.1', 'Path=/']
         for prop in properties:
-            assert prop in res.headers['Set-Cookie']
+            assert any(prop in c for c in res.headers.getlist('Set-Cookie'))
 
         cookie_value = self.get_cookie_by_name(res, 'dm_session')
         assert cookie_value['dm_session'] is not None
