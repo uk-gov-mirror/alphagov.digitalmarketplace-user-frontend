@@ -252,19 +252,6 @@ gulp.task('test', function () {
     }))
 })
 
-gulp.task('watch', ['build:development'], function () {
-  var jsWatcher = gulp.watch([assetsFolder + '/**/*.js'], ['js'])
-  var cssWatcher = gulp.watch([assetsFolder + '/**/*.scss'], ['sass'])
-  var dmWatcher = gulp.watch([npmRoot + '/digitalmarketplace-frameworks/**'], ['copy:frameworks'])
-  var notice = function (event) {
-    console.log('File ' + event.path + ' was ' + event.type + ' running tasks...')
-  }
-
-  cssWatcher.on('change', notice)
-  jsWatcher.on('change', notice)
-  dmWatcher.on('change', notice)
-})
-
 gulp.task('set_environment_to_development', function (cb) {
   environment = 'development'
   cb()
@@ -275,37 +262,34 @@ gulp.task('set_environment_to_production', function (cb) {
   cb()
 })
 
-gulp.task(
-  'copy',
-  [
-    'copy:template_assets:images',
-    'copy:template_assets:stylesheets',
-    'copy:template_assets:javascripts',
-    'copy:govuk_toolkit_assets:images',
-    'copy:dm_toolkit_assets:stylesheets',
-    'copy:dm_toolkit_assets:images',
-    'copy:dm_toolkit_assets:templates',
-    'copy:images',
-    'copy:svg',
-    'copy:govuk_template'
-  ]
-)
+gulp.task('copy', gulp.parallel(
+  'copy:template_assets:images',
+  'copy:template_assets:stylesheets',
+  'copy:template_assets:javascripts',
+  'copy:govuk_toolkit_assets:images',
+  'copy:dm_toolkit_assets:stylesheets',
+  'copy:dm_toolkit_assets:images',
+  'copy:dm_toolkit_assets:templates',
+  'copy:images',
+  'copy:svg',
+  'copy:govuk_template'
+))
 
-gulp.task(
-  'compile',
-  [
-    'copy'
-  ],
-  function () {
-    gulp.start('sass')
-    gulp.start('js')
+gulp.task('compile', gulp.series('copy', gulp.parallel('sass', 'js')))
+
+gulp.task('build:development', gulp.series(gulp.parallel('set_environment_to_development', 'clean'), 'compile'))
+
+gulp.task('build:production', gulp.series(gulp.parallel('set_environment_to_production', 'clean'), 'compile'))
+
+gulp.task('watch', gulp.series('build:development', function () {
+  var jsWatcher = gulp.watch([assetsFolder + '/**/*.js'], ['js'])
+  var cssWatcher = gulp.watch([assetsFolder + '/**/*.scss'], ['sass'])
+  var dmWatcher = gulp.watch([npmRoot + '/digitalmarketplace-frameworks/**'], ['copy:frameworks'])
+  var notice = function (event) {
+    console.log('File ' + event.path + ' was ' + event.type + ' running tasks...')
   }
-)
 
-gulp.task('build:development', ['set_environment_to_development', 'clean'], function () {
-  gulp.start('compile')
-})
-
-gulp.task('build:production', ['set_environment_to_production', 'clean'], function () {
-  gulp.start('compile')
-})
+  cssWatcher.on('change', notice)
+  jsWatcher.on('change', notice)
+  dmWatcher.on('change', notice)
+}))
