@@ -30,6 +30,7 @@ EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE = Markup(
 
 PASSWORD_UPDATED_MESSAGE = "You have successfully changed your password."
 PASSWORD_NOT_UPDATED_MESSAGE = "Could not update password due to an error."
+PASSWORD_UPDATE_FORBIDDEN = "Please contact an administrator to change the password for this account."
 
 
 @main.route('/reset-password', methods=["GET"])
@@ -195,56 +196,75 @@ def update_password(token):
 def change_password():
     form = PasswordChangeForm()
     dashboard_url = get_user_dashboard_url(current_user)
-
     # Checking that the old password is correct is done as a validator on the form.
     if form.validate_on_submit():
-        response = data_api_client.update_user_password(current_user.id, form.password.data,
-                                                        updater=current_user.email_address)
-        if response:
-            current_app.logger.info(
-                "User {user_id} successfully changed their password",
-                extra={'user_id': current_user.id}
+
+        # Log and break with an error if the admin manager tries to reset their password. This should be done by a dev.
+        if current_user.role in ("admin-manager",):
+            current_app.logger.warning(
+                "{code}: Password reset requested for {user_role} user '{email_hash}'",
+                extra={
+                    "code": "login.reset-email.bad-role",
+                    "email_hash": hash_string(current_user.email_address),
+                    "user_role": current_user.role,
+                }
             )
+            flash(PASSWORD_UPDATE_FORBIDDEN, 'error')
+            return redirect(dashboard_url)
 
-            notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
+        response = data_api_client.update_user_password(
+            current_user.id,
+            form.password.data,
+            updater=current_user.email_address
+        )
 
-            token = generate_token(
-                {
-                    "user": current_user.id
-                },
-                current_app.config['SHARED_EMAIL_KEY'],
-                current_app.config['RESET_PASSWORD_SALT']
-            )
-
-            try:
-                notify_client.send_email(
-                    current_user.email_address,
-                    template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['change_password_alert'],
-                    personalisation={
-                        'url': url_for('main.reset_password', token=token, _external=True),
-                    },
-                    reference='change-password-alert-{}'.format(hash_string(current_user.email_address))
-                )
-
-                current_app.logger.info(
-                    "{code}: Password change alert email sent for email_hash {email_hash}",
-                    extra={
-                        'email_hash': hash_string(current_user.email_address),
-                        'code': 'login.password-change-alert-email.sent'
-                    }
-                )
-
-            except EmailError as exc:
-                log_email_error(
-                    exc,
-                    "Password change alert",
-                    "login.password-change-alert-email.notify-error",
-                    current_user.email_address
-                )
-
-            flash(PASSWORD_UPDATED_MESSAGE)
-        else:
+        # Break with an error if response from api resetting password was not successful
+        if not response:
             flash(PASSWORD_NOT_UPDATED_MESSAGE, 'error')
+            return redirect(dashboard_url)
+
+        # The password was successfully changed.
+        # Log the success and try to send email notifying the user their password was changed.
+        current_app.logger.info(
+            "User {user_id} successfully changed their password",
+            extra={'user_id': current_user.id}
+        )
+
+        notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
+
+        token = generate_token(
+            {"user": current_user.id},
+            current_app.config['SHARED_EMAIL_KEY'],
+            current_app.config['RESET_PASSWORD_SALT']
+        )
+
+        try:
+            notify_client.send_email(
+                current_user.email_address,
+                template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['change_password_alert'],
+                personalisation={'url': url_for('main.reset_password', token=token, _external=True)},
+                reference='change-password-alert-{}'.format(hash_string(current_user.email_address))
+            )
+
+            current_app.logger.info(
+                "{code}: Password change alert email sent for email_hash {email_hash}",
+                extra={
+                    'email_hash': hash_string(current_user.email_address),
+                    'code': 'login.password-change-alert-email.sent'
+                }
+            )
+
+        except EmailError as exc:
+            # If sending the email notification for the password change fails log the failure
+            log_email_error(
+                exc,
+                "Password change alert",
+                "login.password-change-alert-email.notify-error",
+                current_user.email_address
+            )
+
+        # Show the user their password was successfully changed
+        flash(PASSWORD_UPDATED_MESSAGE)
         return redirect(dashboard_url)
 
     errors = get_errors_from_wtform(form)
