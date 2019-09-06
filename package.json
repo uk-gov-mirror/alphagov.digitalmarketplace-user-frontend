@@ -24,9 +24,12 @@
     "jquery": "1.12.0"
   },
   "scripts": {
-    "test": "./node_modules/gulp/bin/gulp.js test",
-    "frontend-build:development": "./node_modules/gulp/bin/gulp.js build:development",
-    "frontend-build:production": "./node_modules/gulp/bin/gulp.js build:production",
-    "frontend-build:watch": "./node_modules/gulp/bin/gulp.js watch"
+    "frontend-build:development": "gulp build:development",
+    "frontend-build:production": "gulp build:production",
+    "frontend-build:watch": "gulp watch",
+    "test": "standard gulpfile.js && gulp test"
+  },
+  "devDependencies": {
+    "standard": "^14.1.0"
   }
 }
