@@ -79,7 +79,7 @@ def process_login():
             next=next_url), 400
 
 
-@main.route('/logout', methods=["POST"])
+@main.route('/logout', methods=["GET", "POST"])
 def logout():
     session.clear()
     logout_user()
