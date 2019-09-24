@@ -179,7 +179,7 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '123456789o',
+            'password': 'password12345',
             'confirm_password': 'o123456789'
         })
         assert res.status_code == 400
@@ -194,8 +194,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '123456789o',
-            'confirm_password': '123456789o'
+            'password': 'password12345',
+            'confirm_password': 'password12345'
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
@@ -203,7 +203,7 @@ class TestResetPassword(BaseApplicationTest):
 
         assert reset_password.PASSWORD_UPDATED_MESSAGE in res.get_data(as_text=True)
         self.data_api_client.update_user_password.assert_called_with(
-            self._user.get('user'), '123456789o', self._user.get('email'))
+            self._user.get('user'), 'password12345', self._user.get('email'))
 
     def test_password_change_unknown_failure(self):
         self.data_api_client.update_user_password.return_value = False
@@ -214,8 +214,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '123456789o',
-            'confirm_password': '123456789o'
+            'password': 'password12345',
+            'confirm_password': 'password12345'
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/login'
@@ -223,7 +223,7 @@ class TestResetPassword(BaseApplicationTest):
 
         assert reset_password.PASSWORD_NOT_UPDATED_MESSAGE in res.get_data(as_text=True)
         self.data_api_client.update_user_password.assert_called_with(
-            self._user.get('user'), '123456789o', self._user.get('email'))
+            self._user.get('user'), 'password12345', self._user.get('email'))
 
     def test_should_not_strip_whitespace_surrounding_reset_password_password_field(self):
         token = generate_token(
@@ -233,11 +233,11 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         self.client.post(url, data={
-            'password': '  123456789o',
-            'confirm_password': '  123456789o'
+            'password': '  password12345',
+            'confirm_password': '  password12345'
         })
         self.data_api_client.update_user_password.assert_called_with(
-            self._user.get('user'), '  123456789o', self._user.get('email'))
+            self._user.get('user'), '  password12345', self._user.get('email'))
 
     def test_token_created_before_last_updated_password_cannot_be_used(self):
         self.data_api_client.get_user.return_value = self.user(
@@ -250,8 +250,8 @@ class TestResetPassword(BaseApplicationTest):
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
-            'password': '123456789o',
-            'confirm_password': '123456789o'
+            'password': 'password12345',
+            'confirm_password': 'password12345'
         }, follow_redirects=True)
 
         assert res.status_code == 200
@@ -427,7 +427,7 @@ class TestChangePassword(BaseApplicationTest):
     @pytest.mark.parametrize(
         "old_password",
         (
-            "123456789o",
+            "password12345",
             # test that changing from an invalid "old password" to a valid new one is allowed
             "3nf9s",
             "digitalmarketplace",
@@ -472,8 +472,8 @@ class TestChangePassword(BaseApplicationTest):
             '/user/change-password',
             data={
                 'old_password': 'o987654321',
-                'password': '123456789o',
-                'confirm_password': '123456789o'
+                'password': 'password12345',
+                'confirm_password': 'password12345'
             }
         )
         assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR) \
@@ -486,7 +486,7 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': 'o9876',
                 'confirm_password': 'o9876'
             }
@@ -501,7 +501,7 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': bad_password,
                 'confirm_password': bad_password,
             }
@@ -515,7 +515,7 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': 'o' * 51,
                 'confirm_password': 'o' * 51
             }
@@ -529,9 +529,9 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': 'o987654321',
-                'confirm_password': '123456789o'
+                'confirm_password': 'password12345'
             }
         )
         assert response.status_code == 400
@@ -542,7 +542,7 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': 'o987654321',
                 'confirm_password': 'o987654321'
             }
@@ -557,7 +557,7 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': 'o987654321',
                 'confirm_password': 'o987654321'
             }
@@ -580,7 +580,7 @@ class TestChangePassword(BaseApplicationTest):
         response = self.client.post(
             '/user/change-password',
             data={
-                'old_password': '123456789o',
+                'old_password': 'password12345',
                 'password': 'o987654321',
                 'confirm_password': 'o987654321'
             }
