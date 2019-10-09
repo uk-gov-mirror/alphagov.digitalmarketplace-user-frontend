@@ -66,25 +66,25 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         assert res.status_code == 400
         assert self.strip_all_whitespace(EMAIL_INVALID_ERROR) in content
 
+    @pytest.mark.parametrize("user_role", (
+        "admin",
+        "admin-ccs-category",
+        "admin-ccs-sourcing",
+        "admin-ccs-data-controller",
+        "admin-framework-manager",
+        "buyer",
+        "supplier",
+    ))
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
-    def test_redirect_to_same_page_on_success(self, send_email):
-        res = self.client.post("/user/reset-password", data={
-            'email_address': 'email@email.com'
-        })
-        assert res.status_code == 302
-        assert res.location == 'http://localhost/user/reset-password'
-        assert send_email.call_args_list == [mock.call(
-            'email@email.com',
-            personalisation={'url': AnyStringMatching(r"http://localhost/user/reset-password/*")},
-            reference=AnyStringMatching(r"reset-password-*"),
-            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password']
-        )]
+    def test_reset_password_request_redirects_to_same_page_and_shows_flash_message(self, send_email, user_role):
+        self.data_api_client.get_user.return_value = self.user(
+            123, "email@email.com", 1234, "Ahoy", name="Bob", role=user_role,
+        )
 
-    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
-    def test_show_email_sent_message_on_success(self, send_email):
         res = self.client.post("/user/reset-password", data={
             'email_address': 'email@email.com'
         }, follow_redirects=True)
+
         assert res.status_code == 200
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert self.strip_all_whitespace("we'll send a link to reset the password") in content
@@ -131,36 +131,6 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
             reference="reset-password-{}".format(self.expected_email_hash),
             template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password']
         )]
-
-    @pytest.mark.parametrize("user_role", (
-        "admin",
-        "admin-ccs-category",
-        "admin-ccs-sourcing",
-        "admin-ccs-data-controller",
-        "admin-framework-manager",
-        "buyer",
-        "supplier",
-    ))
-    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
-    def test_should_call_send_email_with_correct_params(self, send_email, user_role):
-        self.data_api_client.get_user.return_value = self.user(
-            123, "email@email.com", 1234, "Ahoy", name="Bob", role=user_role,
-        )
-        res = self.client.post(
-            '/user/reset-password',
-            data={'email_address': 'email@email.com'}
-        )
-
-        assert res.status_code == 302
-        send_email.assert_called_once_with(
-            mock.ANY,  # self
-            "email@email.com",
-            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password'],
-            personalisation={
-                'url': MockMatcher(lambda x: '/user/reset-password/gAAAA' in x),
-            },
-            reference='reset-password-8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50='
-        )
 
     @mock.patch('app.main.helpers.logging_helpers.current_app')
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
