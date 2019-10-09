@@ -29,6 +29,7 @@ PASSWORD_CHANGE_SUCCESS_MESSAGE = "You have successfully changed your password."
 class TestSendResetPasswordEmail(BaseApplicationTest):
 
     _user = None
+    expected_email_hash = '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50='
 
     def setup_method(self, method):
         super().setup_method(method)
@@ -74,9 +75,9 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         assert res.location == 'http://localhost/user/reset-password'
         assert send_email.call_args_list == [mock.call(
             'email@email.com',
-            personalisation={'url': mock.ANY},
+            personalisation={'url': AnyStringMatching(r"http://localhost/user/reset-password/*")},
             reference=AnyStringMatching(r"reset-password-*"),
-            template_name_or_id=mock.ANY
+            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password']
         )]
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
@@ -87,6 +88,12 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         assert res.status_code == 200
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert self.strip_all_whitespace("we'll send a link to reset the password") in content
+        assert send_email.call_args_list == [mock.call(
+            'email@email.com',
+            personalisation={'url': AnyStringMatching(r"http://localhost/user/reset-password/*")},
+            reference="reset-password-{}".format(self.expected_email_hash),
+            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password']
+        )]
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_nonexistent_account_sends_email_to_sandbox_address(self, send_email):
@@ -95,27 +102,22 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         with mock.patch('app.main.views.reset_password.current_app') as current_app_mock:
             res = self.client.post("/user/reset-password", data={
                 'email_address': 'email@email.com'
-            }, follow_redirects=True)
+            })
 
-        assert res.status_code == 200
-        content = self.strip_all_whitespace(res.get_data(as_text=True))
-        assert self.strip_all_whitespace("we'll send a link to reset the password") in content
-        assert send_email.call_args_list == [
-            mock.call(
-                reset_password.NOTIFY_SANDBOX_ADDRESS,
-                reference=AnyStringMatching(r"reset-password-nonexistent-user-*"),
-                template_name_or_id=mock.ANY
-            )
-        ]
-        assert current_app_mock.logger.info.call_args_list == [
-            mock.call(
-                '{code}: Sending password (non-)reset email for invalid user email_hash {email_hash}',
-                extra={
-                    'email_hash': '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
-                    'code': 'login.reset-email.invalid-email'
-                }
-            )
-        ]
+        assert res.status_code == 302
+        self.assert_flashes("we'll send a link to reset the", expected_category='message')
+        assert send_email.call_args_list == [mock.call(
+            reset_password.NOTIFY_SANDBOX_ADDRESS,
+            reference="reset-password-nonexistent-user-{}".format(self.expected_email_hash),
+            template_name_or_id=current_app_mock.config['NOTIFY_TEMPLATES']['reset_password_inactive']
+        )]
+        assert current_app_mock.logger.info.call_args_list == [mock.call(
+            '{code}: Sending password (non-)reset email for invalid user email_hash {email_hash}',
+            extra={
+                'email_hash': self.expected_email_hash,
+                'code': 'login.reset-email.invalid-email'
+            }
+        )]
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_should_strip_whitespace_surrounding_reset_password_email_address_field(self, send_email):
@@ -123,6 +125,12 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
             'email_address': ' email@email.com'
         })
         self.data_api_client.get_user.assert_called_with(email_address='email@email.com')
+        assert send_email.call_args_list == [mock.call(
+            'email@email.com',
+            personalisation={'url': AnyStringMatching(r"http://localhost/user/reset-password/*")},
+            reference="reset-password-{}".format(self.expected_email_hash),
+            template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password']
+        )]
 
     @pytest.mark.parametrize("user_role", (
         "admin",
@@ -167,17 +175,15 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         assert res.status_code == 503
         assert PASSWORD_RESET_EMAIL_ERROR in res.get_data(as_text=True)
 
-        assert current_app.logger.error.call_args_list == [
-            mock.call(
-                '{code}: {email_type} email for email_hash {email_hash} failed to send. Error: {error}',
-                extra={
-                    'email_hash': '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
-                    'error': 'Notify API is down',
-                    'code': 'login.reset-email.notify-error',
-                    'email_type': "Password reset"
-                }
-            )
-        ]
+        assert current_app.logger.error.call_args_list == [mock.call(
+            '{code}: {email_type} email for email_hash {email_hash} failed to send. Error: {error}',
+            extra={
+                'email_hash': self.expected_email_hash,
+                'error': 'Notify API is down',
+                'code': 'login.reset-email.notify-error',
+                'email_type': "Password reset"
+            }
+        )]
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
     def test_inactive_user_attempts_password_reset(self, send_email):
@@ -192,12 +198,12 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         assert res.status_code == 302
         # Asserting the whole flash message is a bit messy due to line breaks
         self.assert_flashes("we'll send a link to reset the", expected_category='message')
-        send_email.assert_called_once_with(
+        assert send_email.call_args_list == [mock.call(
             mock.ANY,  # self
             "email@email.com",
             template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password_inactive'],
-            reference='reset-password-inactive-8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
-        )
+            reference="reset-password-inactive-{}".format(self.expected_email_hash),
+        )]
 
     @mock.patch("app.main.views.reset_password.DMNotifyClient.send_email", autospec=True)
     def test_admin_manager_does_not_get_reset_email(self, send_email):
@@ -213,7 +219,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         # to prevent revealing email addresses for admins we still show the usual result
         assert res.status_code == 302
         self.assert_flashes("we'll send a link to reset the", expected_category='message')
-        send_email.assert_not_called()
+        assert send_email.call_args_list == []
 
 
 class TestResetPassword(BaseApplicationTest):
