@@ -89,7 +89,7 @@ class TestResetPassword(BaseApplicationTest):
         assert self.strip_all_whitespace("we'll send a link to reset the password") in content
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
-    def test_nonexistent_account_shows_flash_message_but_doesnt_send_email(self, send_email):
+    def test_nonexistent_account_sends_email_to_sandbox_address(self, send_email):
         self.data_api_client.get_user.return_value = None
 
         with mock.patch('app.main.views.reset_password.current_app') as current_app_mock:
@@ -100,10 +100,16 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 200
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert self.strip_all_whitespace("we'll send a link to reset the password") in content
-        assert send_email.call_args_list == []
+        assert send_email.call_args_list == [
+            mock.call(
+                reset_password.NOTIFY_SANDBOX_ADDRESS,
+                reference=AnyStringMatching(r"reset-password-nonexistent-user-*"),
+                template_name_or_id=mock.ANY
+            )
+        ]
         assert current_app_mock.logger.info.call_args_list == [
             mock.call(
-                '{code}: Password reset request for invalid email_hash {email_hash}',
+                '{code}: Sending password (non-)reset email for invalid user email_hash {email_hash}',
                 extra={
                     'email_hash': '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
                     'code': 'login.reset-email.invalid-email'
