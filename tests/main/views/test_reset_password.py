@@ -4,6 +4,7 @@ from lxml import html, cssselect
 
 from dmutils.email import generate_token
 from dmutils.email.exceptions import EmailError
+from dmtestutils.comparisons import AnyStringMatching
 
 from ...helpers import BaseApplicationTest, MockMatcher
 
@@ -71,6 +72,12 @@ class TestResetPassword(BaseApplicationTest):
         })
         assert res.status_code == 302
         assert res.location == 'http://localhost/user/reset-password'
+        assert send_email.call_args_list == [mock.call(
+            'email@email.com',
+            personalisation={'url': mock.ANY},
+            reference=AnyStringMatching(r"reset-password-*"),
+            template_name_or_id=mock.ANY
+        )]
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_show_email_sent_message_on_success(self, send_email):
@@ -80,6 +87,29 @@ class TestResetPassword(BaseApplicationTest):
         assert res.status_code == 200
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert self.strip_all_whitespace("we'll send a link to reset the password") in content
+
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    def test_nonexistent_account_shows_flash_message_but_doesnt_send_email(self, send_email):
+        self.data_api_client.get_user.return_value = None
+
+        with mock.patch('app.main.views.reset_password.current_app') as current_app_mock:
+            res = self.client.post("/user/reset-password", data={
+                'email_address': 'email@email.com'
+            }, follow_redirects=True)
+
+        assert res.status_code == 200
+        content = self.strip_all_whitespace(res.get_data(as_text=True))
+        assert self.strip_all_whitespace("we'll send a link to reset the password") in content
+        assert send_email.call_args_list == []
+        assert current_app_mock.logger.info.call_args_list == [
+            mock.call(
+                '{code}: Password reset request for invalid email_hash {email_hash}',
+                extra={
+                    'email_hash': '8yc90Y2VvBnVHT5jVuSmeebxOCRJcnKicOe7VAsKu50=',
+                    'code': 'login.reset-email.invalid-email'
+                }
+            )
+        ]
 
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
     def test_should_strip_whitespace_surrounding_reset_password_email_address_field(self, send_email):
