@@ -134,7 +134,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
 
     @mock.patch('app.main.helpers.logging_helpers.current_app')
     @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
-    def test_should_be_an_error_if_send_email_fails(self, send_email, current_app):
+    def test_should_be_an_error_if_send_email_fails_for_real_user(self, send_email, current_app):
         send_email.side_effect = EmailError(Exception('Notify API is down'))
 
         res = self.client.post(
@@ -152,6 +152,30 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
                 'error': 'Notify API is down',
                 'code': 'login.reset-email.notify-error',
                 'email_type': "Password reset"
+            }
+        )]
+
+    @mock.patch('app.main.helpers.logging_helpers.current_app')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email')
+    def test_should_be_an_error_if_send_email_fails_for_nonexistent_user(self, send_email, current_app):
+        send_email.side_effect = EmailError(Exception('Notify API is down'))
+        self.data_api_client.get_user.return_value = None
+
+        res = self.client.post(
+            '/user/reset-password',
+            data={'email_address': 'email@email.com'}
+        )
+
+        assert res.status_code == 503
+        assert PASSWORD_RESET_EMAIL_ERROR in res.get_data(as_text=True)
+
+        assert current_app.logger.error.call_args_list == [mock.call(
+            '{code}: {email_type} email for email_hash {email_hash} failed to send. Error: {error}',
+            extra={
+                'email_hash': self.expected_email_hash,
+                'error': 'Notify API is down',
+                'code': 'login.reset-email-nonexistent.notify-error',
+                'email_type': "Password reset (non-existent user)"
             }
         )]
 
@@ -173,6 +197,31 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
             "email@email.com",
             template_name_or_id=self.app.config['NOTIFY_TEMPLATES']['reset_password_inactive'],
             reference="reset-password-inactive-{}".format(self.expected_email_hash),
+        )]
+
+    @mock.patch('app.main.helpers.logging_helpers.current_app')
+    @mock.patch('app.main.views.reset_password.DMNotifyClient.send_email', autospec=True)
+    def test_should_be_an_error_if_send_email_fails_for_inactive_user(self, send_email, current_app):
+        send_email.side_effect = EmailError(Exception('Notify API is down'))
+        self.data_api_client.get_user.return_value = self.user(
+            123, "email@email.com", 1234, 'email', 'Name', active=False,
+        )
+        res = self.client.post(
+            '/user/reset-password',
+            data={'email_address': 'email@email.com'}
+        )
+
+        assert res.status_code == 503
+        assert PASSWORD_RESET_EMAIL_ERROR in res.get_data(as_text=True)
+
+        assert current_app.logger.error.call_args_list == [mock.call(
+            '{code}: {email_type} email for email_hash {email_hash} failed to send. Error: {error}',
+            extra={
+                'email_hash': self.expected_email_hash,
+                'error': 'Notify API is down',
+                'code': 'login.reset-email-inactive.notify-error',
+                'email_type': "Password reset (inactive user)"
+            }
         )]
 
     @mock.patch("app.main.views.reset_password.DMNotifyClient.send_email", autospec=True)

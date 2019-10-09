@@ -140,7 +140,7 @@ def send_reset_password_email():
                 log_email_error(
                     exc,
                     "Password reset (non-existent user)",
-                    "login.reset-email.notify-error",
+                    "login.reset-email-nonexistent.notify-error",
                     email_address,  # Hashed by the helper function
                 )
                 return render_template(
