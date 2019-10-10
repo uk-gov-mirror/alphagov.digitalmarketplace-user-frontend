@@ -112,7 +112,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
             template_name_or_id=current_app_mock.config['NOTIFY_TEMPLATES']['reset_password_inactive']
         )]
         assert current_app_mock.logger.info.call_args_list == [mock.call(
-            '{code}: Sending password (non-)reset email for invalid user email_hash {email_hash}',
+            '{code}: Sent password (non-)reset email for invalid user email_hash {email_hash}',
             extra={
                 'email_hash': self.expected_email_hash,
                 'code': 'login.reset-email.invalid-email'

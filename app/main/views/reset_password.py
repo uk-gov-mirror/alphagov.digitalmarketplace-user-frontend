@@ -94,7 +94,7 @@ def send_reset_password_email():
                     ), 503
 
                 current_app.logger.info(
-                    "{code}: Sending password reset email for email_hash {email_hash}",
+                    "{code}: Sent password reset email for email_hash {email_hash}",
                     extra={
                         'email_hash': hash_string(user.email_address),
                         'code': 'login.reset-email.sent'
@@ -120,7 +120,7 @@ def send_reset_password_email():
                     ), 503
 
                 current_app.logger.warning(
-                    "{code}: Sending password (non-)reset email for inactive user email_hash {email_hash}",
+                    "{code}: Sent password (non-)reset email for inactive user email_hash {email_hash}",
                     extra={
                         'email_hash': hash_string(user.email_address),
                         'code': 'login.reset-email-inactive.sent',
@@ -149,7 +149,7 @@ def send_reset_password_email():
                 ), 503
 
             current_app.logger.info(
-                "{code}: Sending password (non-)reset email for invalid user email_hash {email_hash}",
+                "{code}: Sent password (non-)reset email for invalid user email_hash {email_hash}",
                 extra={
                     'email_hash': hash_string(email_address),
                     'code': 'login.reset-email.invalid-email'
