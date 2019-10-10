@@ -30,6 +30,7 @@ EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE = Markup(
 
 PASSWORD_UPDATED_MESSAGE = "You have successfully changed your password."
 PASSWORD_NOT_UPDATED_MESSAGE = "Could not update password due to an error."
+NOTIFY_SANDBOX_ADDRESS = "simulate-delivered@notifications.service.gov.uk"
 
 
 @main.route('/reset-password', methods=["GET"])
@@ -47,11 +48,10 @@ def send_reset_password_email():
     if form.validate_on_submit():
         email_address = form.email_address.data
         user_json = data_api_client.get_user(email_address=email_address)
+        notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
 
         if user_json is not None:
             user = User.from_json(user_json)
-            notify_client = DMNotifyClient(current_app.config['DM_NOTIFY_API_KEY'])
-
             if user.role in ("admin-manager",):
                 # if this user wants their password reset they'll have to come to us
                 current_app.logger.warning(
@@ -94,7 +94,7 @@ def send_reset_password_email():
                     ), 503
 
                 current_app.logger.info(
-                    "{code}: Sending password reset email for email_hash {email_hash}",
+                    "{code}: Sent password reset email for email_hash {email_hash}",
                     extra={
                         'email_hash': hash_string(user.email_address),
                         'code': 'login.reset-email.sent'
@@ -120,15 +120,36 @@ def send_reset_password_email():
                     ), 503
 
                 current_app.logger.warning(
-                    "{code}: Sending password (non-)reset email for inactive user email_hash {email_hash}",
+                    "{code}: Sent password (non-)reset email for inactive user email_hash {email_hash}",
                     extra={
                         'email_hash': hash_string(user.email_address),
                         'code': 'login.reset-email-inactive.sent',
                     }
                 )
         else:
+            # Send a email to the Notify sandbox using the 'inactive' template, to mitigate any timing attacks (where
+            # a user's existence could be determined by the response time of this view). Any errors are also handled
+            # in the same way as for inactive users.
+            try:
+                notify_client.send_email(
+                    NOTIFY_SANDBOX_ADDRESS,
+                    template_name_or_id=current_app.config['NOTIFY_TEMPLATES']['reset_password_inactive'],
+                    reference='reset-password-nonexistent-user-{}'.format(hash_string(email_address)),
+                )
+            except EmailError as exc:
+                log_email_error(
+                    exc,
+                    "Password reset (non-existent user)",
+                    "login.reset-email-nonexistent.notify-error",
+                    email_address,  # Hashed by the helper function
+                )
+                return render_template(
+                    'toolkit/errors/500.html',
+                    error_message="Failed to send password reset.",
+                ), 503
+
             current_app.logger.info(
-                "{code}: Password reset request for invalid email_hash {email_hash}",
+                "{code}: Sent password (non-)reset email for invalid user email_hash {email_hash}",
                 extra={
                     'email_hash': hash_string(email_address),
                     'code': 'login.reset-email.invalid-email'
