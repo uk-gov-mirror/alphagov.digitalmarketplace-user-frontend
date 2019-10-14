@@ -79,7 +79,12 @@ def process_login():
             next=next_url), 400
 
 
-@main.route('/logout', methods=["POST"])
+# We allow logging out via GET request so that we can have a simple link in the
+# site header. We would prefer to be able to have a degree of protection
+# against inadvertent/malicious logout requests without the user knowing, which
+# is why we have used POST previously, but our site header design needs work
+# before that can happen.
+@main.route('/logout', methods=["GET", "POST"])
 def logout():
     session.clear()
     logout_user()

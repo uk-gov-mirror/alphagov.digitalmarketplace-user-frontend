@@ -186,6 +186,14 @@ class TestLogin(BaseApplicationTest):
         with self.client.session_transaction() as session:
             assert session.get('company_name') is None
 
+    @mock.patch("app.main.views.auth.logout_user")
+    def test_visiting_logout_should_logout(self, logout_user):
+        self.login_as_supplier()
+        res = self.client.get('/user/logout')
+        assert logout_user.called
+        assert res.status_code == 302
+        assert res.location == 'http://localhost/user/login'
+
     def test_should_return_a_403_for_invalid_login(self):
         self.data_api_client.authenticate_user.return_value = None
 
