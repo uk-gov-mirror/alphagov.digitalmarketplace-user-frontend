@@ -14,12 +14,15 @@ const repoRoot = path.join(__dirname)
 const npmRoot = path.join(repoRoot, 'node_modules')
 const govukToolkitRoot = path.join(npmRoot, 'govuk_frontend_toolkit')
 const govukElementsRoot = path.join(npmRoot, 'govuk-elements-sass')
+const govukFrontendRoot = path.join(npmRoot, 'digitalmarketplace-govuk-frontend', 'govuk-frontend')
 const dmToolkitRoot = path.join(npmRoot, 'digitalmarketplace-frontend-toolkit', 'toolkit')
 const assetsFolder = path.join(repoRoot, 'app', 'assets')
 const staticFolder = path.join(repoRoot, 'app', 'static')
 const govukTemplateFolder = path.join(repoRoot, 'node_modules', 'govuk_template')
 const govukTemplateAssetsFolder = path.join(govukTemplateFolder, 'assets')
 const govukTemplateLayoutsFolder = path.join(govukTemplateFolder, 'views', 'layouts')
+const govukFrontendFontsFolder = path.join(govukFrontendRoot, 'assets', 'fonts')
+const govukFrontendImageFolder = path.join(govukFrontendRoot, 'assets', 'images')
 
 // JavaScript paths
 const jsSourceFile = path.join(assetsFolder, 'javascripts', 'application.js')
@@ -226,6 +229,24 @@ gulp.task(
   )
 )
 
+gulp.task(
+  'copy:govuk_frontend_assets:fonts',
+  copyFactory(
+    'fonts from the GOVUK frontend assets',
+    govukFrontendFontsFolder,
+    assetsFolder + '/fonts'
+  )
+)
+
+gulp.task(
+  'copy:govuk_frontend_assets:images',
+  copyFactory(
+    'images from the GOVUK frontend',
+    govukFrontendImageFolder,
+    staticFolder + '/images/govuk-frontend/'
+  )
+)
+
 gulp.task('test', function () {
   const manifest = require(path.join(repoRoot, 'spec', 'javascripts', 'manifest.js')).manifest
 
@@ -265,7 +286,9 @@ gulp.task('copy', gulp.parallel(
   'copy:dm_toolkit_assets:templates',
   'copy:images',
   'copy:svg',
-  'copy:govuk_template'
+  'copy:govuk_template',
+  'copy:govuk_frontend_assets:fonts',
+  'copy:govuk_frontend_assets:images'
 ))
 
 gulp.task('compile', gulp.series('copy', gulp.parallel('sass', 'js')))
@@ -275,9 +298,9 @@ gulp.task('build:development', gulp.series(gulp.parallel('set_environment_to_dev
 gulp.task('build:production', gulp.series(gulp.parallel('set_environment_to_production', 'clean'), 'compile'))
 
 gulp.task('watch', gulp.series('build:development', function () {
-  const jsWatcher = gulp.watch([assetsFolder + '/**/*.js'], ['js'])
-  const cssWatcher = gulp.watch([assetsFolder + '/**/*.scss'], ['sass'])
-  const dmWatcher = gulp.watch([npmRoot + '/digitalmarketplace-frameworks/**'], ['copy:frameworks'])
+  const jsWatcher = gulp.watch([assetsFolder + '/**/*.js'], gulp.series('js'))
+  const cssWatcher = gulp.watch([assetsFolder + '/**/*.scss'], gulp.series('sass'))
+  const dmWatcher = gulp.watch([npmRoot + '/digitalmarketplace-frameworks/**'], gulp.series('copy:frameworks'))
   const notice = function (event) {
     console.log('File ' + event.path + ' was ' + event.type + ' running tasks...')
   }
