@@ -255,7 +255,7 @@ class BaseApplicationTest(object):
 
     def assert_breadcrumbs(self, response, extra_breadcrumbs=None):
         breadcrumbs = html.fromstring(response.get_data(as_text=True)).xpath(
-            '//*[@id="global-breadcrumb"]/nav/ol/li'
+            '//*[@class="govuk-breadcrumbs"]/ol/li'
         )
 
         breadcrumbs_we_expect = [('Digital Marketplace', '/')]
@@ -265,8 +265,13 @@ class BaseApplicationTest(object):
         assert len(breadcrumbs) == len(breadcrumbs_we_expect)
 
         for index, link in enumerate(breadcrumbs_we_expect):
-            assert breadcrumbs[index].find('a').text_content().strip() == link[0]
-            assert breadcrumbs[index].find('a').get('href').strip() == link[1]
+            if link[1] is None:
+                # a non-link breadcrumb
+                assert breadcrumbs[index].xpath("normalize-space(string())") == link[0]
+                assert not breadcrumbs[index].find("a")
+            else:
+                assert breadcrumbs[index].find('a').xpath("normalize-space(string())") == link[0]
+                assert breadcrumbs[index].find('a').get('href').strip() == link[1]
 
 
 class MockMatcher(object):
