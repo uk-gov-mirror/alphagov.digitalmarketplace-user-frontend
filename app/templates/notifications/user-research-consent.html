@@ -24,13 +24,13 @@
   {% include 'toolkit/forms/validation.html' %}
 
   <div class="column-two-thirds">
-    {% with heading = "{}".format(
-        "Join the user research mailing list" 
-          if not form.user_research_opt_in.data
-          else "Unsubscribe from the user research mailing list"
-        ) %}
-      {% include "toolkit/page-heading.html" %}
-    {% endwith %}
+    <h1 class="govuk-heading-xl">
+    {% if form.user_research_opt_in.data %}
+      Unsubscribe from the user research mailing list
+    {% else %}
+      Join the user research mailing list
+    {% endif %}
+    </h1>
 
     {% if not form.user_research_opt_in.data %}
       <p class="text">
