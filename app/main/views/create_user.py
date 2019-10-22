@@ -16,7 +16,7 @@ from ... import data_api_client
 INVALID_TOKEN_MESSAGE = Markup(
     """The link you used to create an account is not valid. Check you’ve entered the correct link.
     If you still can’t create an account, email
-    <a href="mailto:{support_email}">{support_email}</a>
+    <a class="govuk-link" href="mailto:{support_email}">{support_email}</a>
     """
 )
 
