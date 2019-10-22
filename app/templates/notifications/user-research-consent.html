@@ -3,20 +3,19 @@
 {% block page_title %}User reserch notification – Digital Marketplace{% endblock %}
 
 {% block breadcrumb %}
-  {%
-    with items = [
-      {
-        "link": "/",
-        "label": "Digital Marketplace"
-      },
-      {
-        "link": dashboard_url,
-        "label": "Your account"
-      }
-    ]
-  %}
-    {% include "toolkit/breadcrumb.html" %}
-  {% endwith %}
+  {{ govukBreadcrumbs({"items": [
+    {
+      "text": "Digital Marketplace",
+      "href": "/",
+    },
+    {
+      "text": "Your account",
+      "href": dashboard_url,
+    },
+    {
+      "text": "User research mailing list preferences",
+    },
+  ]}) }}
 {% endblock %}
 
 {% block main_content %}

@@ -492,7 +492,7 @@ class TestChangePassword(BaseApplicationTest):
         assert response.status_code == 200
         document = html.fromstring(response.get_data(as_text=True))
 
-        self.assert_breadcrumbs(response, [("Your account", redirect_url)])
+        self.assert_breadcrumbs(response, [("Your account", redirect_url), ("Change your password", None)])
 
         form_labels = document.xpath('//form//label/text()')
 
