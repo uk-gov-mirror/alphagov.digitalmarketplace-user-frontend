@@ -9,7 +9,6 @@
 //= require ../../../node_modules/hogan.js/web/builds/3.0.2/hogan-3.0.2.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/option-select.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/support.js
-//= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/live-search.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/list-entry.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/clear-filters.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/word-counter.js
