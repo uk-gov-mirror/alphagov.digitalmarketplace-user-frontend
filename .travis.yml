@@ -4,7 +4,8 @@ python:
 before_install:
   - nvm install
 install:
-  - make requirements-dev npm-install
+  - make requirements-dev
+  - npm ci # if package-lock.json does not match package.json npm ci will exit with an error
 script:
   - PYTEST_ARGS='--cov=app --cov-report=term-missing' make test
 after_success:

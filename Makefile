@@ -37,7 +37,7 @@ freeze-requirements: virtualenv requirements-dev requirements-app.txt
 
 .PHONY: npm-install
 npm-install:
-	npm ci # If dependencies in the package lock do not match those in package.json, npm ci will exit with an error, instead of updating the package lock. (https://docs.npmjs.com/cli/ci.html)
+	npm install
 
 .PHONY: frontend-build
 frontend-build: npm-install
