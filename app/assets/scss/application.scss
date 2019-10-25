@@ -17,12 +17,10 @@ $path: "/user/static/images/";
 @import "toolkit/shared_scss/_lists.scss";
 
 // Digital Marketplace Front-end toolkit styles (only import the files you need)
-@import "toolkit/_breadcrumb.scss";
 @import "toolkit/_grids.scss";
 @import "toolkit/_notification-banners.scss";
 @import "toolkit/_proposition-header.scss";
 @import "toolkit/_secondary-action-link.scss";
-@import "toolkit/_report-a-problem.scss";
 @import "toolkit/forms/_hint.scss";
 @import "toolkit/forms/_questions.scss";
 @import "toolkit/forms/_textboxes.scss";
