@@ -11,18 +11,18 @@
   <div class="grid-row">
     <div class="column-two-thirds error-page">
       <h1 class="govuk-heading-l">You must use a public sector email address</h1>
-      <p>
+      <p class="govuk-body">
         You must be employed by, or represent, a public sector organisation to create a buyer account.
       </p>
-      <p>
+      <p class="govuk-body">
         The email you used doesn't belong to a recognised public sector domain.
       </p>
       <div class="explanation-list">
-        <p class="lead">
-          <a href="{{ url_for('external.create_buyer_account') }}">Create an account using a different email address</a> or email
-          <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> if:
+        <p class="govuk-body-l">
+          <a class="govuk-link" href="{{ url_for('external.create_buyer_account') }}">Create an account using a different email address</a> or email
+          <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> if:
         </p>
-        <ul class="list-bullet">
+        <ul class="govuk-list">
           <li>
             you think your domain should be recognised
           </li>
@@ -38,14 +38,14 @@
 {% elif not token %}
 
   <h1 class="govuk-heading-l">Expired link</h1>
-  <p>
+  <p class="govuk-body">
     The link you used to create an account may have expired.<br/>
     {% if role == 'buyer' %}
-      Check you’ve entered the correct link or <a href="{{ url_for('external.create_buyer_account') }}">send a new one</a>.<br/>
-      If you still can’t create an account, email <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a>.
+      Check you’ve entered the correct link or <a class="govuk-link" href="{{ url_for('external.create_buyer_account') }}">send a new one</a>.<br/>
+      If you still can’t create an account, email <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a>.
     {% elif role == 'supplier' %}
       Check you’ve entered the correct link or ask the person who invited you to send a new invitation.<br/>
-      If you still can’t create a contributor account, email <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a>.
+      If you still can’t create a contributor account, email <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a>.
     {% endif %}
   </p>
 
@@ -54,45 +54,45 @@
   {% if not user.active %}
 
     <h1 class="govuk-heading-l">Your account has been deactivated.</h1>
-    <p>
-      Email <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to reactivate your account.
+    <p class="govuk-body">
+      Email <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to reactivate your account.
     </p>
 
   {% elif user.locked %}
 
     <h1 class="govuk-heading-l">Your account has been locked.</h1>
-    <p>
-      Email <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to unlock your account.
+    <p class="govuk-body">
+      Email <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to unlock your account.
     </p>
 
   {% elif role == 'buyer' and user.role == 'supplier' %}
 
     <h1 class="govuk-heading-l">The details you provided are registered with a supplier.</h1>
-    <p>Your email address is already registered as an account with ‘{{ user.supplier_name }}’.</p>
-    <p>You can <a href="{{ url_for('external.create_buyer_account') }}">create a buyer account using a different email address</a>, or email
-      <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to have your account
+    <p class="govuk-body">Your email address is already registered as an account with ‘{{ user.supplier_name }}’.</p>
+    <p class="govuk-body">You can <a class="govuk-link" href="{{ url_for('external.create_buyer_account') }}">create a buyer account using a different email address</a>, or email
+      <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to have your account
       converted to a buyer account.</p>
-    <p>
-      Alternatively, <a href="{{ url_for('.render_login') }}">Log in</a> to your {{ user.supplier_name }} account.
+    <p class="govuk-body">
+      Alternatively, <a class="govuk-link" href="{{ url_for('.render_login') }}">Log in</a> to your {{ user.supplier_name }} account.
     </p>
 
   {% elif role == 'supplier' and user.role == 'supplier' and token.get("supplier_id") != user.supplier_id %}
 
     <h1 class="govuk-heading-l">The details you provided are registered with another supplier.</h1>
-    <p>You were invited by ‘{{ token.get("supplier_name") }}’.</p>
-    <p>Your account is registered with ‘{{ user.supplier_name }}’.</p>
+    <p class="govuk-body">You were invited by ‘{{ token.get("supplier_name") }}’.</p>
+    <p class="govuk-body">Your account is registered with ‘{{ user.supplier_name }}’.</p>
     <br>
-    <p>
-      <a href="/login">Log in</a> to your {{ user.supplier_name }} account or email
-      <a href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to register your account with a different organisation.
+    <p class="govuk-body">
+      <a class="govuk-link" href="/login">Log in</a> to your {{ user.supplier_name }} account or email
+      <a class="govuk-link" href="mailto:{{ support_email_address }}">{{ support_email_address }}</a> to register your account with a different organisation.
     </p>
 
   {% else %}
 
     <h1 class="govuk-heading-l">Account already exists</h1>
 
-    <p>
-      <a href="{{ url_for('.render_login') }}">Log in</a> to your account.
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ url_for('.render_login') }}">Log in</a> to your account.
     </p>
 
   {% endif %}
