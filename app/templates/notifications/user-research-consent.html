@@ -20,10 +20,10 @@
 
 {% block main_content %}
 
-<div class="grid-row notification-user-research">
+<div class="govuk-grid-row notification-user-research">
   {% include 'toolkit/forms/validation.html' %}
 
-  <div class="column-two-thirds">
+  <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">
     {% if form.user_research_opt_in.data %}
       Unsubscribe from the user research mailing list
@@ -38,8 +38,8 @@
       </p>
       <p class="govuk-body">
         When you join our user research mailing list you:
-      </div>
-      <ul class="govuk-list">
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
         <li>will only be contacted to be invited to take part in user research</li>
         <li>don’t have to agree to take part in research</li>
         <li>can unsubscribe at any time</li>
