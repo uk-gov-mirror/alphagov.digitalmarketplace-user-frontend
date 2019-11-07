@@ -75,7 +75,9 @@ More generally, the command to start the server is:
 python application.py runserver
 ```
 
-The user app runs on port 5007 by default. Use the app at [http://127.0.0.1:5007/](http://127.0.0.1:5007/)
+Use the app at http://127.0.0.1:5007/user.
+
+When using the development server the user frontend listens on port 5007 by default.
 
 ### Updating application dependencies
 
