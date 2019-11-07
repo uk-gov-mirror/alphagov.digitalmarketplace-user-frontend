@@ -78,10 +78,12 @@ DM_ENVIRONMENT=development flask run
 Use the app at http://127.0.0.1:5007/user.
 
 When using the development server the user frontend listens on port 5007 by default.
-This is configured in the `.flaskenv` file; see the [Flask cli documentation]
-for details on how to configure the development server.
+This can be changed by setting the `DM_USER_PORT` environment variable, e.g.
+to set the port number to 9007:
 
-[Flask cli documentation]: https://flask.palletsprojects.com/en/1.0.x/cli/
+```
+export DM_USER_PORT=9007
+```
 
 ### Updating application dependencies
 
