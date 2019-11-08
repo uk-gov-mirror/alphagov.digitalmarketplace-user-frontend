@@ -4,7 +4,7 @@
 @import "_url-helpers.scss";
 
 // Path to assets for use with file-url()
-$path: "/static/images/";
+$path: "/user/static/images/";
 
 // Digital Marketplace Front-end toolkit shared CSS placeholders used by other DM toolkit styles
 @import "toolkit/shared_placeholders/_temporary-messages.scss";
