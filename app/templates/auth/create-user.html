@@ -5,11 +5,6 @@
 {% endblock %}
 
 {% block mainContent %}
-
-  {% with lede = "There was a problem with the details you gave for:" %}
-    {% include 'toolkit/forms/validation.html' %}
-  {% endwith %}
-
   {% set headings = {
       'buyer': 'Create a new Digital Marketplace account',
       'supplier': "Add your name and create a password"
