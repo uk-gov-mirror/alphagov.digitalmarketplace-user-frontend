@@ -4,7 +4,7 @@
 
 {% from "components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
 {% from "components/button/macro.njk" import govukButton %}
-
+{% from "components/error-summary/macro.njk" import govukErrorSummary %}
 
 {# TODO: Remove once we start removing govuk_template, GOV.UK Frontend template uses pageTitle #}
 {% block page_title %}{% block pageTitle %}{% endblock %}{% endblock %}
@@ -18,6 +18,14 @@
     {% endblock %}
     <main id="content" role="main">
       {% include "toolkit/flash_messages.html" %}
+      {% block errorSummary %}
+        {% if errors %}
+          {{ govukErrorSummary({
+          "titleText": "There is a problem",
+          "errorList": errors.values()
+        }) }}
+        {% endif %}
+      {% endblock %}
       {# TODO: Remove this block when we start removing govuk_template but be sure #}
       {#       To keep the inner block mainContent otherwise no content will be rendered #}
       {% block main_content %}
