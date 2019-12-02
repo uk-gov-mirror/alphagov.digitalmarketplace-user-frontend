@@ -80,14 +80,6 @@
         }) }}
       </form>
 
-      {%
-        with
-        url = dashboard_url,
-        text = "Return to your account"
-      %}
-        {% include "toolkit/secondary-action-link.html" %}
-      {% endwith %}
-
       <a class="govuk-link govuk-!-margin-top-3 govuk-!-display-inline-block" href="{{ dashboard_url }}">
         Return to your account
       </a>
