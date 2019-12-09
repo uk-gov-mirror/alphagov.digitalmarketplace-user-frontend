@@ -121,26 +121,55 @@ class TestCreateUser(BaseApplicationTest):
                 t="send a new one",
             )
 
-    def test_should_render_create_user_page_if_user_does_not_exist(self):
+    @pytest.mark.parametrize(
+        "user_role",
+        ("supplier", "buyer")
+    )
+    def test_should_render_create_user_page_if_user_does_not_exist(self, user_role):
         self.data_api_client.get_user.return_value = None
-        page_titles = ["Create a new Digital Marketplace account", "Add your name and create a password"]
-        button_values = ['Create account'] * 2  # the same for now
 
-        for role, page_title, button_value in zip(self.user_roles, page_titles, button_values):
-            token = self._generate_token(role=role)
-            res = self.client.get(
-                '/user/create/{}'.format(token)
+        token = self._generate_token(role=user_role)
+        res = self.client.get(f"/user/create/{token}")
+        assert res.status_code == 200
+
+        doc = html.fromstring(res.get_data(as_text=True))
+
+        if user_role == "buyer":
+            assert doc.cssselect(
+                "span:contains('test@email.com')"
+                "+ h1:contains('Create a new Digital Marketplace account')"
             )
-            assert res.status_code == 200
+        elif user_role == "supplier":
+            assert doc.cssselect(
+                "span:contains('test@email.com')"
+                "+ h1:contains('Add your name and create a password')"
+            )
 
-            for message in [
-                page_title,
-                button_value,
-                "test@email.com",
-                '<form autocomplete="off" action="/user/create/%s" method="POST" id="createUserForm">'
-                    % urllib.parse.quote(token)
-            ]:
-                assert message in res.get_data(as_text=True)
+        assert len(doc.forms) == 1
+        form = doc.forms[0]
+
+        assert form.get("autocomplete") != "off"
+        assert form.get("method") == "POST"
+        assert form.get("action") == f"/user/create/{urllib.parse.quote(token)}"
+
+        if user_role == "buyer":
+            assert set(form.inputs.keys()) == {"name", "phone_number", "password"}
+        elif user_role == "supplier":
+            assert set(form.inputs.keys()) == {"name", "password"}
+
+        name = form.inputs["name"]
+        assert name.get("autocomplete") == "name"
+        assert name.get("spellcheck") == "false"
+
+        if user_role == "buyer":
+            phone_number = form.inputs["phone_number"]
+            assert phone_number.get("autocomplete") == "tel"
+
+        password = form.inputs["password"]
+        assert password.get("type") == "password"
+        assert password.get("autocomplete") == "new-password"
+
+        assert form.cssselect("button:contains('Create account')")
 
     def test_should_render_an_error_if_already_registered_as_a_buyer(self):
         error_messages = [

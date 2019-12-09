@@ -14,7 +14,7 @@
   <span class="govuk-caption-l">{{ email_address }}</span>
   <h1 class="govuk-heading-l">{{ headings[role] }}</h1>
 
-  <form autocomplete="off" action="{{ url_for('.submit_create_user', encoded_token=token) }}" method="POST" id="createUserForm">
+  <form action="{{ url_for('.submit_create_user', encoded_token=token) }}" method="POST" id="createUserForm">
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
         {{ form.hidden_tag() }}
@@ -28,7 +28,8 @@
           "name": "name",
           "value": form.name.data,
           "attributes": {
-            "autocomplete": "off",
+            "autocomplete": "name",
+            "spellcheck": "false",
           },
         }) }}
 
@@ -46,7 +47,7 @@
             "name": "phone_number",
             "value": form.phone_number.data,
             "attributes": {
-              "autocomplete": "off",
+              "autocomplete": "tel",
             },
           }) }}
         {% endif %}
@@ -61,7 +62,7 @@
           "name": "password",
           "value": form.password.data,
           "attributes": {
-            "autocomplete": "off",
+            "autocomplete": "new-password",
           },
         }) }}
 

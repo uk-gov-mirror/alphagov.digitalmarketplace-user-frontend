@@ -10,6 +10,14 @@ EMAIL_INVALID_ERROR = "You must provide a valid email address"
 
 PASSWORD_EMPTY_ERROR = "You must provide your password"
 
+# subset of WCAG 2.1 input purposes
+# https://www.w3.org/TR/WCAG21/#input-purposes
+VALID_INPUT_PURPOSES = {
+    "username",
+    "current-password",
+    "new-password",
+}
+
 
 class TestLogin(BaseApplicationTest):
 
@@ -233,7 +241,7 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
         self.data_api_client_patch.stop()
         super().teardown_method(method)
 
-    def _forms_and_inputs_not_autofillable(self, url, expected_title, expected_lede=None):
+    def _forms_and_inputs_specify_input_purpose(self, url, expected_title, expected_lede=None):
         response = self.client.get(url)
         assert response.status_code == 200
 
@@ -249,27 +257,27 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
         forms = document.xpath('//main[@id="content"]//form')
 
         for form in forms:
-            assert form.get('autocomplete') == "off"
+            assert form.get("autocomplete") != "off"
             non_hidden_inputs = form.xpath('//input[@type!="hidden"]')
 
             for input in non_hidden_inputs:
-                if input.get('type') != 'submit':
-                    assert input.get('autocomplete') == "off"
+                if input.get("type") != "submit":
+                    assert input.get("autocomplete") in VALID_INPUT_PURPOSES
 
-    def test_login_form_and_inputs_not_autofillable(self):
-        self._forms_and_inputs_not_autofillable(
+    def test_login_form_and_inputs_specify_input_purpose(self):
+        self._forms_and_inputs_specify_input_purpose(
             "/user/login",
             "Log in to the Digital Marketplace"
         )
 
-    def test_request_password_reset_form_and_inputs_not_autofillable(self):
-        self._forms_and_inputs_not_autofillable(
+    def test_request_password_reset_form_and_inputs_specify_input_purpose(self):
+        self._forms_and_inputs_specify_input_purpose(
             "/user/reset-password",
             "Reset password"
         )
 
     @mock.patch('app.main.views.reset_password.data_api_client')
-    def test_reset_password_form_and_inputs_not_autofillable(self, data_api_client):
+    def test_reset_password_form_and_inputs_specify_input_purpose(self, data_api_client):
         data_api_client.get_user.return_value = self.user(
             123, "email@email.com", 1234, 'email', 'name'
         )
@@ -283,7 +291,7 @@ class TestLoginFormsNotAutofillable(BaseApplicationTest):
 
         url = '/user/reset-password/{}'.format(token)
 
-        self._forms_and_inputs_not_autofillable(
+        self._forms_and_inputs_specify_input_purpose(
             url,
             "Reset password",
             "Reset password for email@email.com"
