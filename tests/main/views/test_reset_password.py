@@ -503,6 +503,35 @@ class TestChangePassword(BaseApplicationTest):
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize(
+        "user_role",
+        ("buyer", "supplier", "admin")
+    )
+    def test_form_inputs_specify_input_purpose(self, user_role):
+        if user_role == "buyer":
+            self.login_as_buyer()
+        elif user_role == "admin":
+            self.login_as_admin()
+        elif user_role == "supplier":
+            self.login_as_supplier()
+
+        response = self.client.get("/user/change-password")
+        assert response.status_code == 200
+
+        doc = html.fromstring(response.get_data(as_text=True))
+        form = doc.cssselect("#content form")[0]
+
+        assert form.get("autocomplete") != "off"
+
+        assert form.inputs["old_password"].get("type") == "password"
+        assert form.inputs["old_password"].get("autocomplete") == "current-password"
+
+        assert form.inputs["password"].get("type") == "password"
+        assert form.inputs["password"].get("autocomplete") == "new-password"
+
+        assert form.inputs["confirm_password"].get("type") == "password"
+        assert form.inputs["confirm_password"].get("autocomplete") == "new-password"
+
+    @pytest.mark.parametrize(
         'user_role, redirect_url, user_email',
         [
             ('buyer', '/buyers', 'buyer@email.com'),
