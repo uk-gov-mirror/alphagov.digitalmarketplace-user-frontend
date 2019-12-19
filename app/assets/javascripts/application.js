@@ -14,7 +14,6 @@
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/show-hide-content.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/user-research-consent-banner.js
 //= require ../../../node_modules/digitalmarketplace-govuk-frontend/govuk-frontend/all.js
-//= require _analytics.js'
 //= require _onready.js'
 
 GOVUKFrontend.initAll();
