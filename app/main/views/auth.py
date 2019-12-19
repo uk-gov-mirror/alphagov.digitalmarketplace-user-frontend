@@ -86,6 +86,7 @@ def process_login():
 # before that can happen.
 @main.route('/logout', methods=["GET", "POST"])
 def logout():
+    data_api_client.end_user_session(current_user.email_address, current_user.email_address)
     session.clear()
     logout_user()
     return redirect(url_for('.render_login'))
