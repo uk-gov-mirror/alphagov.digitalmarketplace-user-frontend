@@ -7,19 +7,15 @@
 //= require ../../../node_modules/jquery/dist/jquery.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/option-select.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/support.js
-//= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/list-entry.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/clear-filters.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/word-counter.js
-//= require ../../../node_modules/govuk_frontend_toolkit/javascripts/govuk/selection-buttons.js
 //= require ../../../node_modules/govuk_frontend_toolkit/javascripts/govuk/shim-links-with-button-role.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/shim-links-with-button-role.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/show-hide-content.js
 //= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/user-research-consent-banner.js
-//= require ../../../node_modules/digitalmarketplace-frontend-toolkit/toolkit/javascripts/report-a-problem.js
 //= require ../../../node_modules/digitalmarketplace-govuk-frontend/govuk-frontend/all.js
 //= require _analytics.js'
 //= require _onready.js'
-//= require _selection-buttons.js
 
 GOVUKFrontend.initAll();
 

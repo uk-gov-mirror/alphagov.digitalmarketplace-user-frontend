@@ -23,7 +23,6 @@ $path: "/user/static/images/";
 @import "toolkit/_notification-banners.scss";
 @import "toolkit/_phase-banner.scss";
 @import "toolkit/_proposition-header.scss";
-@import "toolkit/_report-a-problem.scss";
 @import "toolkit/forms/_hint.scss";
 @import "toolkit/forms/_questions.scss";
 @import "toolkit/forms/_textboxes.scss";
@@ -41,7 +40,6 @@ $govuk-compatibility-govukelements: true;
 
 // App specific styles
 @import "_text.scss";
-@import "_secondary-action-link.scss";
 
 // Overrides
 @import "overrides/_notification-banner";
