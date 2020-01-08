@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "del": "^5.1.0",
-    "digitalmarketplace-frontend-toolkit": "https://github.com/alphagov/digitalmarketplace-frontend-toolkit.git#v36.0.0",
+    "digitalmarketplace-frontend-toolkit": "https://github.com/alphagov/digitalmarketplace-frontend-toolkit.git#v36.1.0",
     "digitalmarketplace-govuk-frontend": "^0.3.1",
     "govuk-elements-sass": "3.0.3",
     "govuk_frontend_toolkit": "5.0.3",
@@ -16,7 +16,6 @@
     "gulp": "^4.0.2",
     "gulp-filelog": "0.4.1",
     "gulp-include": "^2.4.1",
-    "gulp-jasmine-phantom": "alphagov/gulp-jasmine-phantom#node-10-fs-unlink",
     "gulp-sass": "^4.0.2",
     "gulp-shell": "^0.7.1",
     "gulp-sourcemaps": "^2.6.5",
@@ -27,9 +26,19 @@
     "frontend-build:development": "gulp build:development",
     "frontend-build:production": "gulp build:production",
     "frontend-build:watch": "gulp watch",
-    "test": "standard gulpfile.js && gulp test"
+    "test": "standard \"gulpfile.js\" \"spec/**/*.js\" && jest"
   },
   "devDependencies": {
+    "jest": "^24.9.0",
     "standard": "^14.1.0"
+  },
+  "standard": {
+    "env": {
+      "jest": true
+    },
+    "globals": [
+      "GOVUK",
+      "spyOn"
+    ]
   }
 }
