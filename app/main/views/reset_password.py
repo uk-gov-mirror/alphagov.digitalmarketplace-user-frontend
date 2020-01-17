@@ -147,7 +147,7 @@ def send_reset_password_email():
                 }
             )
 
-        flash(EMAIL_SENT_MESSAGE.format(support_email=current_app.config['SUPPORT_EMAIL_ADDRESS']))
+        flash(EMAIL_SENT_MESSAGE.format(support_email=current_app.config['SUPPORT_EMAIL_ADDRESS']), "success")
         return redirect(url_for('.request_password_reset'))
     else:
         return render_template("auth/request-password-reset.html",
@@ -159,7 +159,7 @@ def send_reset_password_email():
 def reset_password(token):
     decoded = decode_password_reset_token(token, data_api_client)
     if 'error' in decoded:
-        flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, 'error')
+        flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, "error")
         return redirect(url_for('.request_password_reset'))
 
     email_address = decoded['email']
@@ -178,7 +178,7 @@ def update_password(token):
     form = PasswordResetForm()
     decoded = decode_password_reset_token(token, data_api_client)
     if 'error' in decoded:
-        flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, 'error')
+        flash(EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE, "error")
         return redirect(url_for('.request_password_reset'))
 
     user_id = decoded["user"]
@@ -190,9 +190,9 @@ def update_password(token):
             current_app.logger.info(
                 "User {user_id} successfully changed their password",
                 extra={'user_id': user_id})
-            flash(PASSWORD_UPDATED_MESSAGE)
+            flash(PASSWORD_UPDATED_MESSAGE, "success")
         else:
-            flash(PASSWORD_NOT_UPDATED_MESSAGE, 'error')
+            flash(PASSWORD_NOT_UPDATED_MESSAGE, "error")
         return redirect(url_for('.render_login'))
     else:
         return render_template("auth/reset-password.html",
@@ -254,9 +254,9 @@ def change_password():
                     current_user.email_address
                 )
 
-            flash(PASSWORD_UPDATED_MESSAGE)
+            flash(PASSWORD_UPDATED_MESSAGE, "success")
         else:
-            flash(PASSWORD_NOT_UPDATED_MESSAGE, 'error')
+            flash(PASSWORD_NOT_UPDATED_MESSAGE, "error")
         return redirect(dashboard_url)
 
     errors = get_errors_from_wtform(form)
