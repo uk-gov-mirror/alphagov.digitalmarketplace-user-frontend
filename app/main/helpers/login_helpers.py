@@ -1,7 +1,7 @@
 from urllib.parse import urlparse, urljoin
 
 from flask_login import current_user
-from flask import flash, request, redirect, url_for
+from flask import request, redirect, url_for
 
 
 def is_safe_url(next_url):
@@ -31,8 +31,7 @@ def redirect_logged_in_user(next_url=None, account_created=False):
     else:
         redirect_path = url_for('external.index')
 
-    if account_created:
-        flash("{}?account-created=true".format(redirect_path), category="track-page-view")
+    # TODO: emit analytics event if account_created
 
     return redirect(redirect_path)
 
