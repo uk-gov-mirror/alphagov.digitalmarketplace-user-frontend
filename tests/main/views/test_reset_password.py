@@ -435,7 +435,7 @@ class TestResetPassword(BaseApplicationTest):
 
         assert res.status_code == 200
         document = html.fromstring(res.get_data(as_text=True))
-        error_selector = cssselect.CSSSelector('div.banner-destructive-without-action')
+        error_selector = cssselect.CSSSelector('div.dm-alert.dm-alert--error')
         error_elements = error_selector(document)
         assert len(error_elements) == 1
         assert reset_password.EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE in error_elements[0].text_content()
