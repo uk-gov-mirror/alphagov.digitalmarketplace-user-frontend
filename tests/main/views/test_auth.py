@@ -230,7 +230,7 @@ class TestLogin(BaseApplicationTest):
         assert self.strip_all_whitespace(EMAIL_INVALID_ERROR) in content
 
 
-class TestLoginFormsNotAutofillable(BaseApplicationTest):
+class TestLoginFormIsAccessible(BaseApplicationTest):
 
     def setup_method(self, method):
         super().setup_method(method)
