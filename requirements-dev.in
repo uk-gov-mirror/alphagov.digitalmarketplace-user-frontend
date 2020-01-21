@@ -1,0 +1,16 @@
+-c requirements.txt
+
+coverage
+coveralls
+cssselect
+flake8
+freezegun
+lxml
+mock
+pip-tools
+pytest
+pytest-cov
+python-dotenv
+watchdog
+
+git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils
