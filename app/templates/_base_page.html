@@ -36,11 +36,11 @@
     "html": 'Help us improve the Digital Marketplace - <a class="govuk-link" href="'  + url_for('external.help') + '">send your feedback</a>'
   }) }}
   {% block breadcrumb %}{% endblock%}
-  {% include "toolkit/flash_messages.html" %}
 {% endblock %}
 
 
 {% block content %}
+  {% include "toolkit/flash_messages.html" %}
   {% block errorSummary %}
     {% if errors %}
       {{ govukErrorSummary({
