@@ -1,0 +1,27 @@
+// Custom styles for digitalmarketplace-govuk-frontend CookieSettings component
+
+// Settings form and banner messages are not shown if Javascript is not enabled
+.dm-cookie-settings__form-wrapper,
+.dm-cookie-settings__warning {
+  display: none;
+
+  .js-enabled & {
+    display: block;
+  }
+}
+
+.dm-cookie-settings__no-js {
+  .js-enabled & {
+    display: none;
+  }
+}
+
+.dm-cookie-settings__confirmation {
+  @include govuk-font(19);
+  display: none;
+}
+
+.dm-cookie-settings__error {
+  @include govuk-font(19);
+  display: none;
+}

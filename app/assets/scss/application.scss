@@ -27,6 +27,7 @@ $govuk-compatibility-govukelements: true;
 @import "node_modules/digitalmarketplace-govuk-frontend/digitalmarketplace/all";
 
 // Overrides
+@import "overrides/_cookie-settings";
 @import "overrides/_notification-banner";
 @import "overrides/_govuk-label";
 
