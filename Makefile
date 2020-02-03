@@ -24,7 +24,7 @@ upgrade-pip: virtualenv
 	${VIRTUALENV_ROOT}/bin/pip install --upgrade pip
 
 .PHONY: requirements
-requirements: virtualenv upgrade-pip requirements.txt
+requirements: virtualenv test-requirements upgrade-pip requirements.txt
 	${VIRTUALENV_ROOT}/bin/pip install -r requirements.txt
 
 .PHONY: requirements-dev
@@ -45,7 +45,11 @@ frontend-build: npm-install
 	npm run --silent frontend-build:${GULP_ENVIRONMENT}
 
 .PHONY: test
-test: show-environment frontend-build test-flake8 test-python test-javascript
+test: show-environment test-requirements frontend-build test-flake8 test-python test-javascript
+
+.PHONY: test-requirements
+test-requirements:
+	./scripts/test_requirements.sh
 
 .PHONY: test-flake8
 test-flake8: virtualenv requirements-dev
