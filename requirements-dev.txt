@@ -25,7 +25,7 @@ mock==3.0.5
 more-itertools==8.0.2     # via pytest, zipp
 packaging==20.0           # via pytest
 pathtools==0.1.2          # via watchdog
-pip-tools==4.3.0
+pip-tools==4.4.1
 pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
 pycodestyle==2.5.0        # via flake8
