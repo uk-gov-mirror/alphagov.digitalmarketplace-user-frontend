@@ -23,7 +23,7 @@ docutils==0.15.2          # via botocore
 flask-gzip==0.2
 flask-login==0.4.1
 flask-script==2.0.6
-flask-wtf==0.14.2
+flask-wtf==0.14.3
 flask==1.0.4
 fleep==1.0.1
 future==0.18.2            # via notifications-python-client
@@ -32,7 +32,7 @@ govuk-country-register==0.5.0
 git+https://github.com/alphagov/govuk-frontend-jinja.git@v0.5.1-alpha#egg=govuk-frontend-jinja
 idna==2.8                 # via cryptography, requests
 inflection==0.3.1
-itsdangerous==0.24        # via flask
+itsdangerous==0.24        # via flask, flask-wtf
 jinja2==2.10.3            # via flask
 jmespath==0.9.4           # via boto3, botocore
 mailchimp3==3.0.6
