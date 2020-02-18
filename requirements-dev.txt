@@ -8,7 +8,7 @@ argh==0.26.2              # via watchdog
 attrs==19.3.0             # via pytest
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
-click==7.0                # via pip-tools
+click==7.0
 coverage==5.0.2
 coveralls==1.10.0
 cssselect==1.1.0
@@ -25,7 +25,7 @@ mock==3.0.5
 more-itertools==8.0.2     # via pytest, zipp
 packaging==20.0           # via pytest
 pathtools==0.1.2          # via watchdog
-pip-tools==4.4.1
+git+https://github.com/lfdebrux/pip-tools.git@4.4.2-lock-alpha#egg=pip-tools
 pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
 pycodestyle==2.5.0        # via flake8
@@ -37,7 +37,7 @@ python-dateutil==2.8.1    # via freezegun
 python-dotenv==0.10.3
 pyyaml==5.3               # via watchdog
 requests==2.22.0          # via coveralls
-six==1.13.0               # via freezegun, mock, packaging, pip-tools, python-dateutil
+six==1.13.0               # via freezegun, mock, packaging, python-dateutil
 urllib3==1.25.7           # via requests
 watchdog==0.9.0
 wcwidth==0.1.8            # via pytest
