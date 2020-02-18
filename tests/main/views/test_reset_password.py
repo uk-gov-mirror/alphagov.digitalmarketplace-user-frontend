@@ -269,7 +269,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.get(url)
@@ -290,7 +290,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -306,7 +306,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -322,7 +322,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -337,7 +337,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -354,7 +354,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -369,7 +369,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -389,7 +389,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
@@ -408,7 +408,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         self.client.post(url, data={
@@ -425,7 +425,7 @@ class TestResetPassword(BaseApplicationTest):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
         url = '/user/reset-password/{}'.format(token)
 
         res = self.client.post(url, data={
