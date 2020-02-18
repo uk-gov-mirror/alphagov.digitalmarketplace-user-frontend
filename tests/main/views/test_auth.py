@@ -287,7 +287,7 @@ class TestLoginFormIsAccessible(BaseApplicationTest):
                 "email": 'email@email.com',
             },
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['RESET_PASSWORD_SALT'])
+            self.app.config['RESET_PASSWORD_TOKEN_NS'])
 
         url = '/user/reset-password/{}'.format(token)
 

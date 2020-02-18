@@ -44,7 +44,7 @@ class TestCreateUser(BaseApplicationTest):
         return generate_token(
             token_data,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['INVITE_EMAIL_SALT']
+            self.app.config['INVITE_EMAIL_TOKEN_NS']
         )
 
     def test_should_be_an_error_for_missing_token(self):
@@ -71,7 +71,7 @@ class TestCreateUser(BaseApplicationTest):
                 'this_is_not_expected': 1234
             },
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['INVITE_EMAIL_SALT']
+            self.app.config['INVITE_EMAIL_TOKEN_NS']
         )
 
         with pytest.raises(KeyError):
@@ -301,7 +301,7 @@ class TestCreateUser(BaseApplicationTest):
             token = generate_token(
                 {"email_address": 'test@example.com'},
                 self.app.config['SHARED_EMAIL_KEY'],
-                self.app.config['INVITE_EMAIL_SALT']
+                self.app.config['INVITE_EMAIL_TOKEN_NS']
             )
 
         res = self.client.get(
@@ -331,7 +331,7 @@ class TestCreateUser(BaseApplicationTest):
                     "email_address": 'test@example.com'
                 },
                 self.app.config['SHARED_EMAIL_KEY'],
-                self.app.config['INVITE_EMAIL_SALT']
+                self.app.config['INVITE_EMAIL_TOKEN_NS']
             )
 
         res = self.client.get(
@@ -380,7 +380,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
         return generate_token(
             token_data,
             self.app.config['SHARED_EMAIL_KEY'],
-            self.app.config['INVITE_EMAIL_SALT']
+            self.app.config['INVITE_EMAIL_TOKEN_NS']
         )
 
     def test_should_fail_if_incorrect_role_param(self):
