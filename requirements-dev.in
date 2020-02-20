@@ -7,10 +7,11 @@ flake8
 freezegun
 lxml
 mock
-pip-tools
 pytest
 pytest-cov
 python-dotenv
 watchdog
+
+git+https://github.com/lfdebrux/pip-tools.git@4.4.2-lock-alpha#egg=pip-tools
 
 git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.6.1#egg=digitalmarketplace-test-utils
