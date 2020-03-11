@@ -56,7 +56,7 @@ requests==2.22.0          # via mailchimp3, notifications-python-client
 s3transfer==0.2.1         # via boto3
 six==1.13.0               # via cryptography, python-dateutil
 unicodecsv==0.14.1
-urllib3==1.25.7           # via botocore, requests
+urllib3==1.25.8           # via botocore, requests
 werkzeug==0.16.0          # via flask
 workdays==1.4
 wtforms==2.2.1            # via flask-wtf
