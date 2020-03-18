@@ -6,7 +6,7 @@
 #
 # This file was locked against the following input files:
 #
-# sha256:1eb925b880216889892f391300d3bda5c507e4dfb3bee7fb3ec5343fc474b97d  requirements.in
+# sha256:824e78ef7e7a3fa40933a01d3c952a80256beba4ca4b5db08071643535fadac7  requirements.in
 #
 asn1crypto==1.3.0         # via cryptography
 blinker==1.4              # via gds-metrics
