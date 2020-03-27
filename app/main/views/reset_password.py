@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import current_app, flash, redirect, url_for, Markup, abort
+from flask import current_app, flash, redirect, url_for, Markup, abort, session
 from flask_login import current_user, login_required
 
 from dmutils.email import DMNotifyClient, generate_token, decode_password_reset_token, EmailError
@@ -205,6 +205,8 @@ def update_password(token):
 @main.route('/change-password', methods=["GET", "POST"])
 @login_required
 def change_password():
+    current_app.logger.debug("REDIS SESSION INFO")
+    current_app.logger.debug(session)
     form = PasswordChangeForm()
     dashboard_url = get_user_dashboard_url(current_user)
 
