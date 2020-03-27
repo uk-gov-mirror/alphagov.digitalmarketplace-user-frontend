@@ -12,10 +12,11 @@ class Config(object):
         os.path.abspath(os.path.dirname(__file__))
     )
     SESSION_COOKIE_NAME = 'dm_session'
-    SESSION_COOKIE_PATH = '/'
+    # SESSION_COOKIE_PATH = '/'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_TYPE = 'redis'
 
     PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
 
