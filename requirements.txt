@@ -6,7 +6,7 @@
 #
 # This file was locked against the following input files:
 #
-# sha256:824e78ef7e7a3fa40933a01d3c952a80256beba4ca4b5db08071643535fadac7  requirements.in
+# sha256:7f5937015860d96bd8e61a63e934fb2b46124611911644313b2595c9c9153eb0  requirements.in
 #
 asn1crypto==1.3.0         # via cryptography
 blinker==1.4              # via gds-metrics
@@ -27,6 +27,7 @@ docutils==0.15.2          # via botocore
 flask-gzip==0.2
 flask-login==0.4.1
 flask-script==2.0.6
+flask-session==0.3.1
 flask-wtf==0.14.3
 flask==1.0.4
 fleep==1.0.1
@@ -52,6 +53,7 @@ python-dateutil==2.8.1    # via botocore
 python-json-logger==0.1.11
 pytz==2019.3
 pyyaml==5.3
+redis==3.4.1
 requests==2.22.0          # via mailchimp3, notifications-python-client
 s3transfer==0.2.1         # via boto3
 six==1.13.0               # via cryptography, python-dateutil

@@ -7,7 +7,7 @@
 # This file was locked against the following input files:
 #
 # sha256:5bf2d823e0e26d736b2fe5ba2e1d4344aeceff3d25e1a763380213f291a507ba  requirements-dev.in
-# sha256:6ca64cbdc75fd3d1939bde320e8378c1762c552136d18400a1aba95f76e00c6a  requirements.txt
+# sha256:26329150cb71866361bd34c68d811371e3b2264f9034dcfc23b6ed82eaac5225  requirements.txt
 #
 argh==0.26.2              # via watchdog
 attrs==19.3.0             # via pytest
