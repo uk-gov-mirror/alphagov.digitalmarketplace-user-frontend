@@ -1,0 +1,32 @@
+{% extends "_base_page.html" %}
+
+{% block mainContent %}
+<h1 class="govuk-heading-l">Redis status</h1>
+
+<p class="govuk-body">Current user session ID: {{ current_session_id }}</p>
+
+<h3 class="govuk-heading-m">Sessions</h3>
+<table class="govuk-table">
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">ID</th>
+          {% for k in expected_session_keys + other_session_keys %}
+            <th scope="col" class="govuk-table__header">{{ k }}</th>
+          {% endfor %}
+        </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+{% for k, v in sessions.items() %}
+    <tr class="govuk-table__row">
+        <td class="govuk-table__cell">{{ k.decode() }}</td>
+        {% for k in expected_session_keys %}
+            <td class="govuk-table__cell">{{ v[k] }}</td>
+        {% endfor %}
+        {% for k in other_session_keys %}
+            <td class="govuk-table__cell">{{ v.get(k) }}</td>
+        {% endfor %}
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+{% endblock %}
