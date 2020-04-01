@@ -7,7 +7,7 @@
 # This file was locked against the following input files:
 #
 # sha256:5bf2d823e0e26d736b2fe5ba2e1d4344aeceff3d25e1a763380213f291a507ba  requirements-dev.in
-# sha256:6ca64cbdc75fd3d1939bde320e8378c1762c552136d18400a1aba95f76e00c6a  requirements.txt
+# sha256:4f720920245a485242527172690539ac3ea83f6549e19c57fc8531a593f3fd66  requirements.txt
 #
 argh==0.26.2              # via watchdog
 attrs==19.3.0             # via pytest
@@ -40,7 +40,7 @@ pytest-cov==2.8.1
 pytest==5.3.2
 python-dateutil==2.8.1    # via freezegun
 python-dotenv==0.10.3
-pyyaml==5.3               # via watchdog
+pyyaml==5.3.1             # via watchdog
 requests==2.22.0          # via coveralls
 six==1.13.0               # via freezegun, mock, packaging, python-dateutil
 urllib3==1.25.8           # via requests
