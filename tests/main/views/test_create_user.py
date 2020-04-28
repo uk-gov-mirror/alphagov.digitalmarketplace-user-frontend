@@ -416,7 +416,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
             assert 'The link you used to create an account may have expired.' in res.get_data(as_text=True)
 
     def test_should_be_an_error_if_missing_name_and_password(self):
-        validation_messages = ["You must enter a name", "You must enter a password"]
+        validation_messages = ["Enter your name", "Enter a password"]
 
         for role in self.user_roles:
             token = self._generate_token(role=role)
@@ -430,7 +430,7 @@ class TestSubmitCreateUser(BaseApplicationTest):
                 assert message in res.get_data(as_text=True)
 
     def test_should_be_an_error_if_too_short_name_and_password(self):
-        validation_messages = ["You must enter a name", "Passwords must be between 10 and 50 characters"]
+        validation_messages = ["Enter your name", "Password must be between 10 and 50 characters"]
 
         for role in self.user_roles:
             token = self._generate_token(role=role)
@@ -466,8 +466,8 @@ class TestSubmitCreateUser(BaseApplicationTest):
             assert res.status_code == 400
             for message in [
                 page_heading,
-                "Names must be between 1 and 255 characters",
-                "Passwords must be between 10 and 50 characters",
+                "Your name must be between 1 and 255 characters",
+                "Password must be between 10 and 50 characters",
                 "test@email.com"
             ]:
                 assert message in res.get_data(as_text=True)

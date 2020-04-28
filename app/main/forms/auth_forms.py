@@ -161,13 +161,13 @@ class CreateUserForm(FlaskForm):
             DataRequired(message="Enter your name"),
             Length(min=1,
                    max=255,
-                   message="Name must be between 1 and 255 characters"
+                   message="Your name must be between 1 and 255 characters"
                    )
         ]
     )
 
     phone_number = StringField(
-        'Phone number', id="input_phone_number",
+        'Phone number (optional)', id="input_phone_number",
         validators=[
             Regexp("^$|^\\+?([\\d\\s()-]){9,20}$",
                    message=("Enter a phone number, like 01632 960 001, +44 0808 157 0192 or (020)-7946-0001")

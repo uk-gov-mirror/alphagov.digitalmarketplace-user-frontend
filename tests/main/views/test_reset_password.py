@@ -13,8 +13,8 @@ from app.main.views import reset_password
 EMAIL_EMPTY_ERROR = "You must provide an email address"
 EMAIL_INVALID_ERROR = "You must provide a valid email address"
 
-PASSWORD_INVALID_LENGTH_ERROR = "Passwords must be between 10 and 50 characters"
-PASSWORD_INVALID_BLACKLISTED_ERROR = "Your password must be hard to guess"
+PASSWORD_INVALID_LENGTH_ERROR = "Enter a password between 10 and 50 characters"
+PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
 PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
