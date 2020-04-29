@@ -19,9 +19,9 @@ PASSWORD_MAX_LENGTH = 50
 
 EMAIL_REGEX = r"^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
-PASSWORD_HINT = f"Must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
-PASSWORD_LENGTH_ERROR_MESSAGE = f"Passwords must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
-PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Your password must be hard to guess"
+PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_LENGTH_ERROR_MESSAGE = f"Enter a password between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."
 
@@ -158,20 +158,19 @@ class CreateUserForm(FlaskForm):
     name = DMStripWhitespaceStringField(
         'Your name', id="input_name",
         validators=[
-            DataRequired(message="You must enter a name"),
+            DataRequired(message="Enter your name"),
             Length(min=1,
                    max=255,
-                   message="Names must be between 1 and 255 characters"
+                   message="Your name must be between 1 and 255 characters"
                    )
         ]
     )
 
     phone_number = StringField(
-        'Phone number', id="input_phone_number",
+        'Phone number (optional)', id="input_phone_number",
         validators=[
             Regexp("^$|^\\+?([\\d\\s()-]){9,20}$",
-                   message=("Phone numbers must be at least 9 characters long. "
-                            "They can only include digits, spaces, plus and minus signs, and brackets.")
+                   message=("Enter a phone number, like 01632 960 001, +44 0808 157 0192 or (020)-7946-0001")
                    )
         ]
     )
@@ -179,7 +178,7 @@ class CreateUserForm(FlaskForm):
     password = PasswordField(
         'Password', id="input_password",
         validators=[
-            DataRequired(message="You must enter a password"),
+            DataRequired(message="Enter a password"),
             Length(
                 min=PASSWORD_MIN_LENGTH,
                 max=PASSWORD_MAX_LENGTH,
