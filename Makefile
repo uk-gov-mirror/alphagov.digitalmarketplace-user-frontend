@@ -24,7 +24,7 @@ upgrade-pip: virtualenv
 	${VIRTUALENV_ROOT}/bin/pip install --upgrade pip
 
 .PHONY: requirements
-requirements: virtualenv test-requirements upgrade-pip requirements.txt
+requirements: virtualenv upgrade-pip requirements.txt
 	${VIRTUALENV_ROOT}/bin/pip install -r requirements.txt
 
 .PHONY: requirements-dev
@@ -33,8 +33,8 @@ requirements-dev: virtualenv upgrade-pip requirements.txt requirements-dev.txt
 
 .PHONY: freeze-requirements
 freeze-requirements: virtualenv requirements-dev requirements.in requirements-dev.in
-	${VIRTUALENV_ROOT}/bin/pip-compile --lock requirements.in
-	${VIRTUALENV_ROOT}/bin/pip-compile --lock requirements-dev.in
+	${VIRTUALENV_ROOT}/bin/pip-compile requirements.in
+	${VIRTUALENV_ROOT}/bin/pip-compile requirements-dev.in
 
 .PHONY: npm-install
 npm-install:
@@ -45,11 +45,7 @@ frontend-build:
 	npm run --silent frontend-build:${GULP_ENVIRONMENT}
 
 .PHONY: test
-test: show-environment test-requirements frontend-build test-flake8 test-python test-javascript
-
-.PHONY: test-requirements
-test-requirements: requirements-dev
-	${VIRTUALENV_ROOT}/bin/pip-check requirements.txt requirements-dev.txt
+test: show-environment frontend-build test-flake8 test-python test-javascript
 
 .PHONY: test-flake8
 test-flake8: virtualenv requirements-dev
