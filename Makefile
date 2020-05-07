@@ -41,7 +41,7 @@ npm-install:
 	npm install
 
 .PHONY: frontend-build
-frontend-build:
+frontend-build: npm-install
 	npm run --silent frontend-build:${GULP_ENVIRONMENT}
 
 .PHONY: test
