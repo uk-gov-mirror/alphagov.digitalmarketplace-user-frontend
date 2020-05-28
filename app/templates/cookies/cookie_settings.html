@@ -21,12 +21,18 @@
 
 {% block mainContent %}
 
-  {{ dmAlert({
-    "type": "error",
-    "classes": "dm-cookie-settings__error",
+  {{ govukErrorSummary({
     "titleText": "There was a problem saving your settings",
-    "text": "Please select 'Yes' or 'No'.",
-    "attributes": [("id", "dm-cookie-settings-error")]
+    "classes": "dm-cookie-settings__error",
+     "attributes": {
+      "id": "dm-cookie-settings-error"
+    },
+    "errorList": [
+      {
+        "text": "Select yes to accept analytics cookies",
+        "href": "#dm-cookie-settings"
+      }
+    ]
   }) }}
 
   {{ dmAlert({
