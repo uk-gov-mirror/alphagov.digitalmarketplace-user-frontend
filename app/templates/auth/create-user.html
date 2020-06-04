@@ -14,7 +14,7 @@
   <span class="govuk-caption-l">{{ email_address }}</span>
   <h1 class="govuk-heading-l">{{ headings[role] }}</h1>
 
-  <form action="{{ url_for('.submit_create_user', encoded_token=token) }}" method="POST" id="createUserForm">
+  <form action="{{ url_for('.submit_create_user', encoded_token=token) }}" method="POST" id="createUserForm" novalidate>
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
         {{ form.hidden_tag() }}
