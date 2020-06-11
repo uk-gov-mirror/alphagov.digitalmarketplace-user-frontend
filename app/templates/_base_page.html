@@ -56,7 +56,7 @@
     %}
       {% for category, message in messages %}
         {{ dmAlert({
-          "titleHtml": titles.get("category") or message,
+          "titleHtml": titles.get(category) or message,
           "html": message if category in titles else None,
           "type": category,
         }) }}
