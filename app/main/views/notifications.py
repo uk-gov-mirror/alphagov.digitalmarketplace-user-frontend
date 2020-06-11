@@ -37,7 +37,7 @@ def user_research_consent():
                 updater=current_user.email_address
             )
 
-            flash("Your preference has been saved", 'success')
+            flash("Your preference has been saved", "success")
             return redirect(dashboard_url)
         else:
             # If the form is not valid set the status code and parse the errors into an acceptable format.

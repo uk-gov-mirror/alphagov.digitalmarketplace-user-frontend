@@ -105,7 +105,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
             })
 
         assert res.status_code == 302
-        self.assert_flashes("we'll send a link to reset the", expected_category='message')
+        self.assert_flashes("we'll send a link to reset the", expected_category="success")
         assert send_email.call_args_list == [mock.call(
             reset_password.NOTIFY_SANDBOX_ADDRESS,
             reference="reset-password-nonexistent-user-{}".format(self.expected_email_hash),
@@ -191,7 +191,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
 
         assert res.status_code == 302
         # Asserting the whole flash message is a bit messy due to line breaks
-        self.assert_flashes("we'll send a link to reset the", expected_category='message')
+        self.assert_flashes("we'll send a link to reset the", expected_category="success")
         assert send_email.call_args_list == [mock.call(
             mock.ANY,  # self
             "email@email.com",
@@ -237,7 +237,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
 
         # to prevent revealing email addresses for admins we still show the usual result
         assert res.status_code == 302
-        self.assert_flashes("we'll send a link to reset the", expected_category='message')
+        self.assert_flashes("we'll send a link to reset the", expected_category="success")
         assert send_email.call_args_list == []
 
 
@@ -435,7 +435,7 @@ class TestResetPassword(BaseApplicationTest):
 
         assert res.status_code == 200
         document = html.fromstring(res.get_data(as_text=True))
-        error_selector = cssselect.CSSSelector('div.banner-destructive-without-action')
+        error_selector = cssselect.CSSSelector('div.dm-alert.dm-alert--error')
         error_elements = error_selector(document)
         assert len(error_elements) == 1
         assert reset_password.EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE in error_elements[0].text_content()
@@ -568,7 +568,7 @@ class TestChangePassword(BaseApplicationTest):
         assert response.location == 'http://localhost{}'.format(redirect_url)
 
         self.data_api_client.update_user_password.assert_called_once_with(123, 'o987654321', updater=user_email)
-        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE)
+        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE, "success")
 
         send_email.assert_called_once_with(
             mock.ANY,  # self
@@ -703,7 +703,7 @@ class TestChangePassword(BaseApplicationTest):
 
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
-        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE)
+        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE, "success")
 
         assert current_app.logger.error.call_args_list == [
             mock.call(
