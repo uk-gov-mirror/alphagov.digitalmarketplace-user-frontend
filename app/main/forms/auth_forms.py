@@ -28,6 +28,7 @@ PASSWORD_BLOCKLIST_ERROR_MESSAGE = "Enter a password that is harder to guess"
 PASSWORD_MISMATCH_ERROR_MESSAGE = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR_MESSAGE = "Enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE = "Confirm your new password"
+PASSWORD_CHANGE_AUTH_ERROR_MESSAGE = "Make sure you’ve entered the right password."
 
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."

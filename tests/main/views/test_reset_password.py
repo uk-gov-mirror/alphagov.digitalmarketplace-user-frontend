@@ -16,12 +16,12 @@ from app.main.forms.auth_forms import (
     PASSWORD_MISMATCH_ERROR_MESSAGE,
     NEW_PASSWORD_EMPTY_ERROR_MESSAGE,
     NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE,
-    PASSWORD_BLOCKLIST_ERROR_MESSAGE
+    PASSWORD_BLOCKLIST_ERROR_MESSAGE,
+    PASSWORD_CHANGE_AUTH_ERROR_MESSAGE
 )
 
 
 PASSWORD_RESET_EMAIL_ERROR = "Try again later."
-PASSWORD_CHANGE_AUTH_ERROR = "Make sure you’ve entered the right password."
 PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
 PASSWORD_CHANGE_UPDATE_ERROR = "Could not update password due to an error."
 
@@ -593,7 +593,7 @@ class TestChangePassword(BaseApplicationTest):
                 'confirm_password': 'password12345'
             }
         )
-        assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR) \
+        assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR_MESSAGE) \
             in self.strip_all_whitespace(response.get_data(as_text=True))
         assert response.status_code == 400
         assert self.data_api_client.update_user_password.called is False
