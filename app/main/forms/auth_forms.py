@@ -19,6 +19,8 @@ PASSWORD_MAX_LENGTH = 50
 
 EMAIL_REGEX = r"^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
+EMAIL_EMPTY_ERROR_MESSAGE = "Enter an email address"
+EMAIL_INVALID_ERROR_MESSAGE = "Enter an email address in the correct format, like name@example.com"
 PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_LENGTH_ERROR_MESSAGE = f"Enter a password between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
@@ -74,9 +76,9 @@ class LoginForm(FlaskForm):
         'Email address', id="input-email_address",
         hint=EMAIL_LOGIN_HINT,
         validators=[
-            DataRequired(message="You must provide an email address"),
+            DataRequired(message=EMAIL_EMPTY_ERROR_MESSAGE),
             Regexp(EMAIL_REGEX,
-                   message="You must provide a valid email address")
+                   message=EMAIL_INVALID_ERROR_MESSAGE)
         ]
     )
     password = PasswordField(
@@ -92,9 +94,9 @@ class EmailAddressForm(FlaskForm):
         'Email address', id="input-email_address",
         hint=EMAIL_LOGIN_HINT,
         validators=[
-            DataRequired(message="You must provide an email address"),
+            DataRequired(message=EMAIL_EMPTY_ERROR_MESSAGE),
             Regexp(EMAIL_REGEX,
-                   message="You must provide a valid email address")
+                   message=EMAIL_INVALID_ERROR_MESSAGE)
         ]
     )
 

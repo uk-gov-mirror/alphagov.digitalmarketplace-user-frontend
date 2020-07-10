@@ -4,9 +4,8 @@ from ...helpers import BaseApplicationTest
 from lxml import html
 import mock
 
+from app.main.forms.auth_forms import EMAIL_EMPTY_ERROR_MESSAGE, EMAIL_INVALID_ERROR_MESSAGE
 
-EMAIL_EMPTY_ERROR = "You must provide an email address"
-EMAIL_INVALID_ERROR = "You must provide a valid email address"
 
 PASSWORD_EMPTY_ERROR = "You must provide your password"
 
@@ -217,7 +216,7 @@ class TestLogin(BaseApplicationTest):
         res = self.client.post("/user/login", data={})
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
-        assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR) in content
+        assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR_MESSAGE) in content
         assert self.strip_all_whitespace(PASSWORD_EMPTY_ERROR) in content
 
     def test_should_be_validation_error_if_invalid_email(self):
@@ -227,7 +226,7 @@ class TestLogin(BaseApplicationTest):
         })
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
-        assert self.strip_all_whitespace(EMAIL_INVALID_ERROR) in content
+        assert self.strip_all_whitespace(EMAIL_INVALID_ERROR_MESSAGE) in content
 
 
 class TestLoginFormIsAccessible(BaseApplicationTest):

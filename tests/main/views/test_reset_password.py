@@ -9,9 +9,8 @@ from dmtestutils.comparisons import AnyStringMatching
 from ...helpers import BaseApplicationTest, MockMatcher
 
 from app.main.views import reset_password
+from app.main.forms.auth_forms import EMAIL_EMPTY_ERROR_MESSAGE, EMAIL_INVALID_ERROR_MESSAGE
 
-EMAIL_EMPTY_ERROR = "You must provide an email address"
-EMAIL_INVALID_ERROR = "You must provide a valid email address"
 
 PASSWORD_INVALID_LENGTH_ERROR = "Enter a password between 10 and 50 characters"
 PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
@@ -56,7 +55,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         res = self.client.post("/user/reset-password", data={})
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
-        assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR) in content
+        assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR_MESSAGE) in content
 
     def test_email_should_be_valid(self):
         res = self.client.post("/user/reset-password", data={
@@ -64,7 +63,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         })
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
-        assert self.strip_all_whitespace(EMAIL_INVALID_ERROR) in content
+        assert self.strip_all_whitespace(EMAIL_INVALID_ERROR_MESSAGE) in content
 
     @pytest.mark.parametrize("user_role", (
         "admin",
