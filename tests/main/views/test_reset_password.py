@@ -12,12 +12,12 @@ from app.main.views import reset_password
 from app.main.forms.auth_forms import (
     EMAIL_EMPTY_ERROR_MESSAGE,
     EMAIL_INVALID_ERROR_MESSAGE,
-    PASSWORD_LENGTH_ERROR_MESSAGE
+    PASSWORD_LENGTH_ERROR_MESSAGE,
+    PASSWORD_MISMATCH_ERROR_MESSAGE
 )
 
 
 PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
-PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
 PASSWORD_RESET_EMAIL_ERROR = "Try again later."
@@ -364,7 +364,7 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': 'o123456789'
         })
         assert res.status_code == 400
-        assert PASSWORD_MISMATCH_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_MISMATCH_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_redirect_to_login_page_on_success(self):
@@ -652,7 +652,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_MISMATCH_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_MISMATCH_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_user_must_be_logged_in_to_change_password(self):

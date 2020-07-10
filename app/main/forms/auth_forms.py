@@ -25,6 +25,8 @@ EMAIL_INVALID_ERROR_MESSAGE = "Enter an email address in the correct format, lik
 PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_LENGTH_ERROR_MESSAGE = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
+PASSWORD_MISMATCH_ERROR_MESSAGE = "The passwords you entered do not match"
+
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."
 
@@ -140,7 +142,7 @@ class PasswordChangeForm(FlaskForm):
         'Confirm new password', id="input-confirm_password",
         validators=[
             DataRequired(message="Please confirm your new password"),
-            EqualTo('password', message="The passwords you entered do not match")
+            EqualTo('password', message=PASSWORD_MISMATCH_ERROR_MESSAGE)
         ]
     )
 
