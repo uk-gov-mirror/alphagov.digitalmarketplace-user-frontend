@@ -33,10 +33,10 @@ PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we
                     "support team can help you fix them quickly."
 
 
-class NotInPasswordBlacklist:
-    # path, relative to flask app root_path, to look for password blacklist files. all files found here will be read,
+class NotInPasswordBlocklist:
+    # path, relative to flask app root_path, to look for password blocklist files. all files found here will be read,
     # one password per line
-    BLACKLIST_DIR_PATH = "data/password_blacklist"
+    BLOCKLIST_DIR_PATH = "data/password_blocklist"
 
     @staticmethod
     def _normalized_password(password):
@@ -46,7 +46,7 @@ class NotInPasswordBlacklist:
     def _lines_from_filepath(cls, filepath):
         with filepath.open("r", encoding="utf-8") as f:
             # we exclude passwords that can't be used anyway as they fall short of the minimum password length - doing
-            # this allows us to keep "original" password lists in the blacklist dir without modification, making them
+            # this allows us to keep "original" password lists in the blocklist dir without modification, making them
             # easier to maintain yet still memory-efficient.
             return tuple(
                 password
@@ -55,24 +55,24 @@ class NotInPasswordBlacklist:
             )
 
     # this value is not populated until first access because construction depends on current_app being available
-    _blacklist_set = None
+    _blocklist_set = None
 
     @classmethod
-    def get_blacklist_set(cls):
-        # cache blacklist set class-wide
-        if cls._blacklist_set is None:
-            cls._blacklist_set = frozenset(chain.from_iterable(
+    def get_blocklist_set(cls):
+        # cache blocklist set class-wide
+        if cls._blocklist_set is None:
+            cls._blocklist_set = frozenset(chain.from_iterable(
                 cls._lines_from_filepath(filepath)
-                for filepath in (Path(current_app.root_path) / cls.BLACKLIST_DIR_PATH).iterdir()
+                for filepath in (Path(current_app.root_path) / cls.BLOCKLIST_DIR_PATH).iterdir()
                 if filepath.is_file()
             ))
-        return cls._blacklist_set
+        return cls._blocklist_set
 
     def __init__(self, message):
         self.message = message
 
     def __call__(self, form, field):
-        if self._normalized_password(field.data) in self.get_blacklist_set():
+        if self._normalized_password(field.data) in self.get_blocklist_set():
             raise ValidationError(self.message)
 
 
@@ -137,7 +137,7 @@ class PasswordChangeForm(FlaskForm):
                 max=PASSWORD_MAX_LENGTH,
                 message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
+            NotInPasswordBlocklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
         ]
     )
     confirm_password = PasswordField(
@@ -191,7 +191,7 @@ class CreateUserForm(FlaskForm):
                 max=PASSWORD_MAX_LENGTH,
                 message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
+            NotInPasswordBlocklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
         ]
     )
 

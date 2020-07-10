@@ -320,7 +320,7 @@ class TestResetPassword(BaseApplicationTest):
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
-    def test_password_should_not_be_in_blacklist(self, bad_password):
+    def test_password_should_not_be_in_blocklist(self, bad_password):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
@@ -613,7 +613,7 @@ class TestChangePassword(BaseApplicationTest):
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
-    def test_new_password_shouldnt_be_in_blacklist(self, bad_password):
+    def test_new_password_shouldnt_be_in_blocklist(self, bad_password):
         self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
