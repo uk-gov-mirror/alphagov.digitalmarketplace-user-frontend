@@ -24,7 +24,7 @@ EMAIL_INVALID_ERROR_MESSAGE = "Enter an email address in the correct format, lik
 
 PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_LENGTH_ERROR_MESSAGE = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
-PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
+PASSWORD_BLOCKLIST_ERROR_MESSAGE = "Enter a password that is harder to guess"
 PASSWORD_MISMATCH_ERROR_MESSAGE = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR_MESSAGE = "Enter a new password"
 NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE = "Confirm your new password"
@@ -137,7 +137,7 @@ class PasswordChangeForm(FlaskForm):
                 max=PASSWORD_MAX_LENGTH,
                 message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
+            NotInPasswordBlacklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
         ]
     )
     confirm_password = PasswordField(
@@ -191,7 +191,7 @@ class CreateUserForm(FlaskForm):
                 max=PASSWORD_MAX_LENGTH,
                 message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
+            NotInPasswordBlacklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
         ]
     )
 

@@ -15,11 +15,11 @@ from app.main.forms.auth_forms import (
     PASSWORD_LENGTH_ERROR_MESSAGE,
     PASSWORD_MISMATCH_ERROR_MESSAGE,
     NEW_PASSWORD_EMPTY_ERROR_MESSAGE,
-    NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE
+    NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE,
+    PASSWORD_BLOCKLIST_ERROR_MESSAGE
 )
 
 
-PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
 PASSWORD_RESET_EMAIL_ERROR = "Try again later."
 PASSWORD_CHANGE_AUTH_ERROR = "Make sure you’ve entered the right password."
 PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
@@ -332,7 +332,7 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': bad_password,
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_BLACKLISTED_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_BLOCKLIST_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_under_51_chars_long(self):
@@ -624,7 +624,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_BLACKLISTED_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_BLOCKLIST_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_under_51_chars_long(self):
