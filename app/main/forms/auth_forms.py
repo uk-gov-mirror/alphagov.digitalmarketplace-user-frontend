@@ -26,6 +26,8 @@ PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_M
 PASSWORD_LENGTH_ERROR_MESSAGE = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
 PASSWORD_MISMATCH_ERROR_MESSAGE = "The passwords you entered do not match"
+NEW_PASSWORD_EMPTY_ERROR_MESSAGE = "Enter a new password"
+NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE = "Confirm your new password"
 
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."
@@ -129,7 +131,7 @@ class PasswordChangeForm(FlaskForm):
     password = PasswordField(
         'New password', id="input-password",
         validators=[
-            DataRequired(message="You must enter a new password"),
+            DataRequired(message=NEW_PASSWORD_EMPTY_ERROR_MESSAGE),
             Length(
                 min=PASSWORD_MIN_LENGTH,
                 max=PASSWORD_MAX_LENGTH,
@@ -141,7 +143,7 @@ class PasswordChangeForm(FlaskForm):
     confirm_password = PasswordField(
         'Confirm new password', id="input-confirm_password",
         validators=[
-            DataRequired(message="Please confirm your new password"),
+            DataRequired(message=NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE),
             EqualTo('password', message=PASSWORD_MISMATCH_ERROR_MESSAGE)
         ]
     )

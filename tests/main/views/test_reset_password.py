@@ -13,13 +13,13 @@ from app.main.forms.auth_forms import (
     EMAIL_EMPTY_ERROR_MESSAGE,
     EMAIL_INVALID_ERROR_MESSAGE,
     PASSWORD_LENGTH_ERROR_MESSAGE,
-    PASSWORD_MISMATCH_ERROR_MESSAGE
+    PASSWORD_MISMATCH_ERROR_MESSAGE,
+    NEW_PASSWORD_EMPTY_ERROR_MESSAGE,
+    NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE
 )
 
 
 PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
-NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
-NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
 PASSWORD_RESET_EMAIL_ERROR = "Try again later."
 PASSWORD_CHANGE_AUTH_ERROR = "Make sure you’ve entered the right password."
 PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
@@ -300,8 +300,8 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': ''
         })
         assert res.status_code == 400
-        assert NEW_PASSWORD_EMPTY_ERROR in res.get_data(as_text=True)
-        assert NEW_PASSWORD_CONFIRM_EMPTY_ERROR in res.get_data(as_text=True)
+        assert NEW_PASSWORD_EMPTY_ERROR_MESSAGE in res.get_data(as_text=True)
+        assert NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_over_ten_chars_long(self):
