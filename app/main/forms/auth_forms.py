@@ -21,8 +21,9 @@ EMAIL_REGEX = r"^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
 EMAIL_EMPTY_ERROR_MESSAGE = "Enter an email address"
 EMAIL_INVALID_ERROR_MESSAGE = "Enter an email address in the correct format, like name@example.com"
+
 PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
-PASSWORD_LENGTH_ERROR_MESSAGE = f"Enter a password between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_LENGTH_ERROR_MESSAGE = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
 PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."

@@ -9,10 +9,13 @@ from dmtestutils.comparisons import AnyStringMatching
 from ...helpers import BaseApplicationTest, MockMatcher
 
 from app.main.views import reset_password
-from app.main.forms.auth_forms import EMAIL_EMPTY_ERROR_MESSAGE, EMAIL_INVALID_ERROR_MESSAGE
+from app.main.forms.auth_forms import (
+    EMAIL_EMPTY_ERROR_MESSAGE,
+    EMAIL_INVALID_ERROR_MESSAGE,
+    PASSWORD_LENGTH_ERROR_MESSAGE
+)
 
 
-PASSWORD_INVALID_LENGTH_ERROR = "Enter a password between 10 and 50 characters"
 PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
 PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
 NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
@@ -313,7 +316,7 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': '123456789'
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
@@ -346,7 +349,7 @@ class TestResetPassword(BaseApplicationTest):
                 '123456789012345678901234567890123456789012345678901'
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_passwords_should_match(self):
@@ -606,7 +609,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
@@ -635,7 +638,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_passwords_should_match(self):
