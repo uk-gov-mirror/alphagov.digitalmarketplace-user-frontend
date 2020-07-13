@@ -20,12 +20,7 @@ from app.main.forms.auth_forms import (
     PASSWORD_CHANGE_AUTH_ERROR_MESSAGE
 )
 
-
-PASSWORD_RESET_EMAIL_ERROR = "Try again later."
-PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
-PASSWORD_CHANGE_UPDATE_ERROR = "Could not update password due to an error."
-
-PASSWORD_CHANGE_SUCCESS_MESSAGE = "You have successfully changed your password."
+PASSWORD_RESET_EMAIL_ERROR = "Try again later."  # Generic 500 error message content
 
 
 class TestSendResetPasswordEmail(BaseApplicationTest):
@@ -570,7 +565,7 @@ class TestChangePassword(BaseApplicationTest):
         assert response.location == 'http://localhost{}'.format(redirect_url)
 
         self.data_api_client.update_user_password.assert_called_once_with(123, 'o987654321', updater=user_email)
-        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE, "success")
+        self.assert_flashes(reset_password.PASSWORD_UPDATED_MESSAGE, "success")
 
         send_email.assert_called_once_with(
             mock.ANY,  # self
@@ -681,7 +676,7 @@ class TestChangePassword(BaseApplicationTest):
         )
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
-        self.assert_flashes(PASSWORD_CHANGE_UPDATE_ERROR, 'error')
+        self.assert_flashes(reset_password.PASSWORD_NOT_UPDATED_MESSAGE, 'error')
         self.data_api_client.update_user_password.assert_called_once_with(
             123,
             'o987654321',
@@ -705,7 +700,7 @@ class TestChangePassword(BaseApplicationTest):
 
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
-        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE, "success")
+        self.assert_flashes(reset_password.PASSWORD_UPDATED_MESSAGE, "success")
 
         assert current_app.logger.error.call_args_list == [
             mock.call(

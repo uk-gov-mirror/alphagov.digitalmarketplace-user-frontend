@@ -28,8 +28,8 @@ EXPIRED_PASSWORD_RESET_TOKEN_MESSAGE = Markup(
     """
 )
 
-PASSWORD_UPDATED_MESSAGE = "You have successfully changed your password."
-PASSWORD_NOT_UPDATED_MESSAGE = "Could not update password due to an error."
+PASSWORD_UPDATED_MESSAGE = "Your password has been successfully changed."
+PASSWORD_NOT_UPDATED_MESSAGE = "Your password could not be updated, due to an error."
 NOTIFY_SANDBOX_ADDRESS = "simulate-delivered@notifications.service.gov.uk"
 
 
