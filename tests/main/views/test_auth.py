@@ -4,10 +4,12 @@ from ...helpers import BaseApplicationTest
 from lxml import html
 import mock
 
-from app.main.forms.auth_forms import EMAIL_EMPTY_ERROR_MESSAGE, EMAIL_INVALID_ERROR_MESSAGE
+from app.main.forms.auth_forms import (
+    EMAIL_EMPTY_ERROR_MESSAGE,
+    EMAIL_INVALID_ERROR_MESSAGE,
+    LOGIN_PASSWORD_EMPTY_ERROR_MESSAGE
+)
 
-
-PASSWORD_EMPTY_ERROR = "You must provide your password"
 
 # subset of WCAG 2.1 input purposes
 # https://www.w3.org/TR/WCAG21/#input-purposes
@@ -217,7 +219,7 @@ class TestLogin(BaseApplicationTest):
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
         assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR_MESSAGE) in content
-        assert self.strip_all_whitespace(PASSWORD_EMPTY_ERROR) in content
+        assert self.strip_all_whitespace(LOGIN_PASSWORD_EMPTY_ERROR_MESSAGE) in content
 
     def test_should_be_validation_error_if_invalid_email(self):
         res = self.client.post("/user/login", data={
