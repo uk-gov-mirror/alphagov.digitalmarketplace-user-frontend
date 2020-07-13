@@ -7,8 +7,7 @@ import mock
 from app.main.forms.auth_forms import (
     EMAIL_EMPTY_ERROR_MESSAGE,
     EMAIL_INVALID_ERROR_MESSAGE,
-    LOGIN_PASSWORD_EMPTY_ERROR_MESSAGE,
-    PASSWORD_CHANGE_AUTH_ERROR_MESSAGE
+    LOGIN_PASSWORD_EMPTY_ERROR_MESSAGE
 )
 from app.main.views.auth import NO_ACCOUNT_MESSAGE
 
