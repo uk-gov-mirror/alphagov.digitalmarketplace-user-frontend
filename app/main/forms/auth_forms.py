@@ -19,17 +19,26 @@ PASSWORD_MAX_LENGTH = 50
 
 EMAIL_REGEX = r"^[^@^\s]+@[^@^\.^\s]+(\.[^@^\.^\s]+)+$"
 EMAIL_LOGIN_HINT = "Enter the email address you used to register with the Digital Marketplace"
+EMAIL_EMPTY_ERROR_MESSAGE = "Enter an email address"
+EMAIL_INVALID_ERROR_MESSAGE = "Enter an email address in the correct format, like name@example.com"
+
 PASSWORD_HINT = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
-PASSWORD_LENGTH_ERROR_MESSAGE = f"Enter a password between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
-PASSWORD_BLACKLISTED_ERROR_MESSAGE = "Enter a password that is harder to guess"
+PASSWORD_LENGTH_ERROR_MESSAGE = f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters"
+PASSWORD_BLOCKLIST_ERROR_MESSAGE = "Enter a password that is harder to guess"
+PASSWORD_MISMATCH_ERROR_MESSAGE = "The passwords you entered do not match"
+NEW_PASSWORD_EMPTY_ERROR_MESSAGE = "Enter a new password"
+NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE = "Confirm your new password"
+PASSWORD_CHANGE_AUTH_ERROR_MESSAGE = "Enter your old password"
+LOGIN_PASSWORD_EMPTY_ERROR_MESSAGE = "Enter your password"
+
 PHONE_NUMBER_HINT = "If there are any urgent problems with your requirements, we need your phone number so the " \
                     "support team can help you fix them quickly."
 
 
-class NotInPasswordBlacklist:
-    # path, relative to flask app root_path, to look for password blacklist files. all files found here will be read,
+class NotInPasswordBlocklist:
+    # path, relative to flask app root_path, to look for password blocklist files. all files found here will be read,
     # one password per line
-    BLACKLIST_DIR_PATH = "data/password_blacklist"
+    BLOCKLIST_DIR_PATH = "data/password_blocklist"
 
     @staticmethod
     def _normalized_password(password):
@@ -39,7 +48,7 @@ class NotInPasswordBlacklist:
     def _lines_from_filepath(cls, filepath):
         with filepath.open("r", encoding="utf-8") as f:
             # we exclude passwords that can't be used anyway as they fall short of the minimum password length - doing
-            # this allows us to keep "original" password lists in the blacklist dir without modification, making them
+            # this allows us to keep "original" password lists in the blocklist dir without modification, making them
             # easier to maintain yet still memory-efficient.
             return tuple(
                 password
@@ -48,24 +57,24 @@ class NotInPasswordBlacklist:
             )
 
     # this value is not populated until first access because construction depends on current_app being available
-    _blacklist_set = None
+    _blocklist_set = None
 
     @classmethod
-    def get_blacklist_set(cls):
-        # cache blacklist set class-wide
-        if cls._blacklist_set is None:
-            cls._blacklist_set = frozenset(chain.from_iterable(
+    def get_blocklist_set(cls):
+        # cache blocklist set class-wide
+        if cls._blocklist_set is None:
+            cls._blocklist_set = frozenset(chain.from_iterable(
                 cls._lines_from_filepath(filepath)
-                for filepath in (Path(current_app.root_path) / cls.BLACKLIST_DIR_PATH).iterdir()
+                for filepath in (Path(current_app.root_path) / cls.BLOCKLIST_DIR_PATH).iterdir()
                 if filepath.is_file()
             ))
-        return cls._blacklist_set
+        return cls._blocklist_set
 
     def __init__(self, message):
         self.message = message
 
     def __call__(self, form, field):
-        if self._normalized_password(field.data) in self.get_blacklist_set():
+        if self._normalized_password(field.data) in self.get_blocklist_set():
             raise ValidationError(self.message)
 
 
@@ -74,15 +83,15 @@ class LoginForm(FlaskForm):
         'Email address', id="input-email_address",
         hint=EMAIL_LOGIN_HINT,
         validators=[
-            DataRequired(message="You must provide an email address"),
+            DataRequired(message=EMAIL_EMPTY_ERROR_MESSAGE),
             Regexp(EMAIL_REGEX,
-                   message="You must provide a valid email address")
+                   message=EMAIL_INVALID_ERROR_MESSAGE)
         ]
     )
     password = PasswordField(
         'Password', id="input-password",
         validators=[
-            DataRequired(message="You must provide your password")
+            DataRequired(message=LOGIN_PASSWORD_EMPTY_ERROR_MESSAGE)
         ]
     )
 
@@ -92,9 +101,9 @@ class EmailAddressForm(FlaskForm):
         'Email address', id="input-email_address",
         hint=EMAIL_LOGIN_HINT,
         validators=[
-            DataRequired(message="You must provide an email address"),
+            DataRequired(message=EMAIL_EMPTY_ERROR_MESSAGE),
             Regexp(EMAIL_REGEX,
-                   message="You must provide a valid email address")
+                   message=EMAIL_INVALID_ERROR_MESSAGE)
         ]
     )
 
@@ -118,26 +127,26 @@ class PasswordChangeForm(FlaskForm):
         'Old password', id="input-old_password",
         validators=[
             DataRequired(message="You must enter your old password"),
-            MatchesCurrentPassword(message="Make sure you’ve entered the right password."),
+            MatchesCurrentPassword(message=PASSWORD_CHANGE_AUTH_ERROR_MESSAGE),
         ]
     )
     password = PasswordField(
         'New password', id="input-password",
         validators=[
-            DataRequired(message="You must enter a new password"),
+            DataRequired(message=NEW_PASSWORD_EMPTY_ERROR_MESSAGE),
             Length(
                 min=PASSWORD_MIN_LENGTH,
                 max=PASSWORD_MAX_LENGTH,
                 message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
+            NotInPasswordBlocklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
         ]
     )
     confirm_password = PasswordField(
         'Confirm new password', id="input-confirm_password",
         validators=[
-            DataRequired(message="Please confirm your new password"),
-            EqualTo('password', message="The passwords you entered do not match")
+            DataRequired(message=NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE),
+            EqualTo('password', message=PASSWORD_MISMATCH_ERROR_MESSAGE)
         ]
     )
 
@@ -184,7 +193,7 @@ class CreateUserForm(FlaskForm):
                 max=PASSWORD_MAX_LENGTH,
                 message=PASSWORD_LENGTH_ERROR_MESSAGE,
             ),
-            NotInPasswordBlacklist(message=PASSWORD_BLACKLISTED_ERROR_MESSAGE),
+            NotInPasswordBlocklist(message=PASSWORD_BLOCKLIST_ERROR_MESSAGE),
         ]
     )
 

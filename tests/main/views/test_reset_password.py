@@ -9,21 +9,18 @@ from dmtestutils.comparisons import AnyStringMatching
 from ...helpers import BaseApplicationTest, MockMatcher
 
 from app.main.views import reset_password
+from app.main.forms.auth_forms import (
+    EMAIL_EMPTY_ERROR_MESSAGE,
+    EMAIL_INVALID_ERROR_MESSAGE,
+    PASSWORD_LENGTH_ERROR_MESSAGE,
+    PASSWORD_MISMATCH_ERROR_MESSAGE,
+    NEW_PASSWORD_EMPTY_ERROR_MESSAGE,
+    NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE,
+    PASSWORD_BLOCKLIST_ERROR_MESSAGE,
+    PASSWORD_CHANGE_AUTH_ERROR_MESSAGE
+)
 
-EMAIL_EMPTY_ERROR = "You must provide an email address"
-EMAIL_INVALID_ERROR = "You must provide a valid email address"
-
-PASSWORD_INVALID_LENGTH_ERROR = "Enter a password between 10 and 50 characters"
-PASSWORD_INVALID_BLACKLISTED_ERROR = "Enter a password that is harder to guess"
-PASSWORD_MISMATCH_ERROR = "The passwords you entered do not match"
-NEW_PASSWORD_EMPTY_ERROR = "You must enter a new password"
-NEW_PASSWORD_CONFIRM_EMPTY_ERROR = "Please confirm your new password"
-PASSWORD_RESET_EMAIL_ERROR = "Try again later."
-PASSWORD_CHANGE_AUTH_ERROR = "Make sure you’ve entered the right password."
-PASSWORD_CHANGE_EMAIL_ERROR = "Failed to send password change alert."
-PASSWORD_CHANGE_UPDATE_ERROR = "Could not update password due to an error."
-
-PASSWORD_CHANGE_SUCCESS_MESSAGE = "You have successfully changed your password."
+PASSWORD_RESET_EMAIL_ERROR = "Try again later."  # Generic 500 error message content
 
 
 class TestSendResetPasswordEmail(BaseApplicationTest):
@@ -56,7 +53,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         res = self.client.post("/user/reset-password", data={})
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
-        assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR) in content
+        assert self.strip_all_whitespace(EMAIL_EMPTY_ERROR_MESSAGE) in content
 
     def test_email_should_be_valid(self):
         res = self.client.post("/user/reset-password", data={
@@ -64,7 +61,7 @@ class TestSendResetPasswordEmail(BaseApplicationTest):
         })
         content = self.strip_all_whitespace(res.get_data(as_text=True))
         assert res.status_code == 400
-        assert self.strip_all_whitespace(EMAIL_INVALID_ERROR) in content
+        assert self.strip_all_whitespace(EMAIL_INVALID_ERROR_MESSAGE) in content
 
     @pytest.mark.parametrize("user_role", (
         "admin",
@@ -298,8 +295,8 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': ''
         })
         assert res.status_code == 400
-        assert NEW_PASSWORD_EMPTY_ERROR in res.get_data(as_text=True)
-        assert NEW_PASSWORD_CONFIRM_EMPTY_ERROR in res.get_data(as_text=True)
+        assert NEW_PASSWORD_EMPTY_ERROR_MESSAGE in res.get_data(as_text=True)
+        assert NEW_PASSWORD_CONFIRM_EMPTY_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_over_ten_chars_long(self):
@@ -314,11 +311,11 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': '123456789'
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
-    def test_password_should_not_be_in_blacklist(self, bad_password):
+    def test_password_should_not_be_in_blocklist(self, bad_password):
         token = generate_token(
             self._user,
             self.app.config['SHARED_EMAIL_KEY'],
@@ -330,7 +327,7 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': bad_password,
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_BLACKLISTED_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_BLOCKLIST_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_under_51_chars_long(self):
@@ -347,7 +344,7 @@ class TestResetPassword(BaseApplicationTest):
                 '123456789012345678901234567890123456789012345678901'
         })
         assert res.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_passwords_should_match(self):
@@ -362,7 +359,7 @@ class TestResetPassword(BaseApplicationTest):
             'confirm_password': 'o123456789'
         })
         assert res.status_code == 400
-        assert PASSWORD_MISMATCH_ERROR in res.get_data(as_text=True)
+        assert PASSWORD_MISMATCH_ERROR_MESSAGE in res.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_redirect_to_login_page_on_success(self):
@@ -568,7 +565,7 @@ class TestChangePassword(BaseApplicationTest):
         assert response.location == 'http://localhost{}'.format(redirect_url)
 
         self.data_api_client.update_user_password.assert_called_once_with(123, 'o987654321', updater=user_email)
-        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE, "success")
+        self.assert_flashes(reset_password.PASSWORD_UPDATED_MESSAGE, "success")
 
         send_email.assert_called_once_with(
             mock.ANY,  # self
@@ -591,7 +588,7 @@ class TestChangePassword(BaseApplicationTest):
                 'confirm_password': 'password12345'
             }
         )
-        assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR) \
+        assert self.strip_all_whitespace(PASSWORD_CHANGE_AUTH_ERROR_MESSAGE) \
             in self.strip_all_whitespace(response.get_data(as_text=True))
         assert response.status_code == 400
         assert self.data_api_client.update_user_password.called is False
@@ -607,11 +604,11 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     @pytest.mark.parametrize("bad_password", ("digitalmarketplace", "dIgItAlMaRkEtPlAcE", "1234567890"))
-    def test_new_password_shouldnt_be_in_blacklist(self, bad_password):
+    def test_new_password_shouldnt_be_in_blocklist(self, bad_password):
         self.login_as_supplier()
         response = self.client.post(
             '/user/change-password',
@@ -622,7 +619,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_BLACKLISTED_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_BLOCKLIST_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_password_should_be_under_51_chars_long(self):
@@ -636,7 +633,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_INVALID_LENGTH_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_LENGTH_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_passwords_should_match(self):
@@ -650,7 +647,7 @@ class TestChangePassword(BaseApplicationTest):
             }
         )
         assert response.status_code == 400
-        assert PASSWORD_MISMATCH_ERROR in response.get_data(as_text=True)
+        assert PASSWORD_MISMATCH_ERROR_MESSAGE in response.get_data(as_text=True)
         assert self.data_api_client.update_user_password.called is False
 
     def test_user_must_be_logged_in_to_change_password(self):
@@ -679,7 +676,7 @@ class TestChangePassword(BaseApplicationTest):
         )
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
-        self.assert_flashes(PASSWORD_CHANGE_UPDATE_ERROR, 'error')
+        self.assert_flashes(reset_password.PASSWORD_NOT_UPDATED_MESSAGE, 'error')
         self.data_api_client.update_user_password.assert_called_once_with(
             123,
             'o987654321',
@@ -703,7 +700,7 @@ class TestChangePassword(BaseApplicationTest):
 
         assert response.status_code == 302
         assert response.location == 'http://localhost/suppliers'
-        self.assert_flashes(PASSWORD_CHANGE_SUCCESS_MESSAGE, "success")
+        self.assert_flashes(reset_password.PASSWORD_UPDATED_MESSAGE, "success")
 
         assert current_app.logger.error.call_args_list == [
             mock.call(
