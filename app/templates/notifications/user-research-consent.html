@@ -53,21 +53,19 @@
 
       <form action="{{ url_for('main.user_research_consent') }}" method="POST" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        {%
-          with
-          type = "checkbox",
-          name = "user_research_opt_in",
-          value = [form.user_research_opt_in.data or None],
-          options = [
+        {% set errorMessage = errors.get('user_research_opt_in', {}).get('message', None) %}
+        {{ govukCheckboxes({
+          'idPrefix': 'input-user_research_opt_in',
+          'name': 'user_research_opt_in',
+          'items': [
             {
-              "label": form.user_research_opt_in.label.text,
-              "value": form.user_research_opt_in.data,
+              'checked': form.user_research_opt_in.data,
+              'value': form.user_research_opt_in.data or None,
+              'text': form.user_research_opt_in.label.text
             }
           ],
-          error = errors.get('user_research_opt_in', {}).get('message', None)
-        %}
-          {% include "toolkit/forms/selection-buttons.html" %}
-        {% endwith %}
+          'errorMessage': { 'text': errorMessage } if errorMessage
+        })}}
 
         {{ govukButton({
           "text": "Save changes",
