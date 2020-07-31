@@ -1,5 +1,7 @@
 import os
+
 import jinja2
+
 from dmutils.status import get_version_label
 from dmutils.asset_fingerprint import AssetFingerprinter
 
@@ -61,13 +63,22 @@ class Config(object):
         repo_root = os.path.abspath(os.path.dirname(__file__))
         digitalmarketplace_govuk_frontend = os.path.join(repo_root, "node_modules", "digitalmarketplace-govuk-frontend")
 
-        template_folders = [
+        govuk_frontend_templates = jinja2.PrefixLoader({
+            "govuk-frontend": jinja2.PackageLoader("govuk_frontend_jinja"),
+            "govuk_frontend_jinja": jinja2.PackageLoader("govuk_frontend_jinja"),
+        })
+
+        file_system_templates = jinja2.FileSystemLoader([
             os.path.join(repo_root, 'app', 'templates'),
             os.path.join(digitalmarketplace_govuk_frontend),
             os.path.join(digitalmarketplace_govuk_frontend, 'digitalmarketplace', 'templates'),
-            os.path.join(digitalmarketplace_govuk_frontend, 'govuk-frontend'),
-        ]
-        jinja_loader = jinja2.FileSystemLoader(template_folders)
+        ])
+
+        jinja_loader = jinja2.ChoiceLoader([
+            govuk_frontend_templates,
+            file_system_templates,
+        ])
+
         app.jinja_loader = jinja_loader
 
 
