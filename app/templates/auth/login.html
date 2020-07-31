@@ -56,18 +56,22 @@
           },
         }) }}
 
-
-        <a class="govuk-link govuk-!-margin-bottom-5 govuk-!-display-block" href="{{ url_for('.request_password_reset') }}">
-          Forgotten password
-        </a>
+        <p class="govuk-body">
+          <a class="govuk-link" href="{{ url_for('.request_password_reset') }}">
+            Forgotten password
+          </a>
+        </p>
 
         {{ govukButton({
           "text": "Log in"
         }) }}
 
-        <a class="govuk-link govuk-!-margin-top-7 govuk-!-font-size-24 govuk-!-display-block" href="{{ url_for('external.create_buyer_account') }}">
-          Create a buyer account
-        </a>
+        <p class="govuk-body-l">
+          <a class="govuk-link" href="{{ url_for('external.create_buyer_account') }}">
+            Create a buyer account
+          </a>
+        </p>
+
       </div>
     </div>
   </form>
