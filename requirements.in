@@ -6,4 +6,4 @@ itsdangerous==1.1.0
 git+https://github.com/alphagov/digitalmarketplace-utils.git@52.5.0#egg=digitalmarketplace-utils==52.5.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.1.1#egg=digitalmarketplace-content-loader
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.4.1#egg=digitalmarketplace-apiclient
-git+https://github.com/alphagov/govuk-frontend-jinja.git@v0.5.1-alpha#egg=govuk-frontend-jinja
+git+https://github.com/alphagov/govuk-frontend-jinja.git@v0.5.2-alpha#egg=govuk-frontend-jinja
