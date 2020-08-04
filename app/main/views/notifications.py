@@ -13,7 +13,6 @@ from .. import main
 from ..forms.user_research import UserResearchOptInForm
 from ..helpers.login_helpers import get_user_dashboard_url
 from ... import data_api_client
-import datetime
 
 
 @main.route('/notifications/user-research', methods=["GET", "POST"])
@@ -48,23 +47,9 @@ def user_research_consent():
         user = data_api_client.get_user(current_user.id)
         form = UserResearchOptInForm(user_research_opt_in=user['users']['userResearchOptedIn'])
 
-    # Set the seen_user_research_message cookie if it does not exist.
-    # This ensures the user research banner is no longer shown.
-    additional_headers = []
-
-    # Changing cookie name will require an update to the following files:
-    # digitalmarketplace-frontend-toolkit/toolkit/templates/user-research-consent-banner.html
-    # digitalmarketplace-frontend-toolkit/toolkit/javascripts/user-research-consent-banner.js
-    cookie_name = 'seen_user_research_message'
-
-    if cookie_name not in request.cookies:
-        expiry_date = datetime.datetime.now() + datetime.timedelta(90)
-        expiry_date = expiry_date.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
-        additional_headers = {'Set-Cookie': "{}=yes; Path=/; Expires={}".format(cookie_name, expiry_date)}
-
     return render_template(
         "notifications/user-research-consent.html",
         form=form,
         errors=errors,
         dashboard_url=dashboard_url
-    ), status_code, additional_headers
+    ), status_code

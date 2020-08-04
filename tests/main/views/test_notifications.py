@@ -26,19 +26,16 @@ class TestUserResearchNotifications(BaseApplicationTest):
         self.login_as_supplier()
         res = self.client.get("/user/notifications/user-research")
         assert res.status_code == 200
-        assert 'seen_user_research_message=yes;' in res.headers['Set-Cookie']
 
     def test_page_shows_for_buyer(self):
         self.login_as_buyer()
         res = self.client.get("/user/notifications/user-research")
         assert res.status_code == 200
-        assert 'seen_user_research_message=yes;' in res.headers['Set-Cookie']
 
     def test_page_shows_for_admin(self):
         self.login_as_admin()
         res = self.client.get("/user/notifications/user-research")
         assert res.status_code == 200
-        assert 'seen_user_research_message=yes;' in res.headers['Set-Cookie']
 
     def test_subscribe_content(self):
         self.login_as_buyer(user_research_opt_in=False)
