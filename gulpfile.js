@@ -14,8 +14,8 @@ const npmRoot = path.join(repoRoot, 'node_modules')
 const govukFrontendRoot = path.join(npmRoot, 'govuk-frontend')
 const assetsFolder = path.join(repoRoot, 'app', 'assets')
 const staticFolder = path.join(repoRoot, 'app', 'static')
-const govukFrontendFontsFolder = path.join(govukFrontendRoot, 'assets', 'fonts')
-const govukFrontendImageFolder = path.join(govukFrontendRoot, 'assets', 'images')
+const govukFrontendFontsFolder = path.join(govukFrontendRoot, 'govuk', 'assets', 'fonts')
+const govukFrontendImageFolder = path.join(govukFrontendRoot, 'govuk', 'assets', 'images')
 
 // JavaScript paths
 const jsSourceFile = path.join(assetsFolder, 'javascripts', 'application.js')
