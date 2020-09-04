@@ -4,6 +4,7 @@
 venv*
 node_modules
 npm-debug.log
+app/assets/scss/govuk
 app/static/*
 
 # Byte-compiled / optimized / DLL files

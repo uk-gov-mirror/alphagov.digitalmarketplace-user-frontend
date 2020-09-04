@@ -11,7 +11,7 @@ const path = require('path')
 let environment
 const repoRoot = path.join(__dirname)
 const npmRoot = path.join(repoRoot, 'node_modules')
-const govukFrontendRoot = path.join(npmRoot, 'digitalmarketplace-govuk-frontend', 'govuk')
+const govukFrontendRoot = path.join(npmRoot, 'govuk-frontend')
 const assetsFolder = path.join(repoRoot, 'app', 'assets')
 const staticFolder = path.join(repoRoot, 'app', 'static')
 const govukFrontendFontsFolder = path.join(govukFrontendRoot, 'assets', 'fonts')
@@ -32,7 +32,8 @@ const sassOptions = {
     outputStyle: 'expanded',
     lineNumbers: true,
     includePaths: [
-      assetsFolder + '/scss'
+      assetsFolder + '/scss',
+      govukFrontendRoot
     ],
     sourceComments: true,
     errLogToConsole: true
@@ -41,7 +42,8 @@ const sassOptions = {
     outputStyle: 'compressed',
     lineNumbers: true,
     includePaths: [
-      assetsFolder + '/scss'
+      assetsFolder + '/scss',
+      govukFrontendRoot
     ]
   }
 }
