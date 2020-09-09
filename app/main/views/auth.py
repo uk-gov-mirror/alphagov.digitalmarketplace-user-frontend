@@ -2,7 +2,6 @@
 from flask_login import current_user
 from flask import (
     current_app,
-    flash,
     get_flashed_messages,
     Markup,
     redirect,
@@ -69,7 +68,6 @@ def process_login():
                     "input_name": "password",
                 },
             })
-            flash(NO_ACCOUNT_MESSAGE, "error")
             return render_template(
                 "auth/login.html",
                 form=form,
