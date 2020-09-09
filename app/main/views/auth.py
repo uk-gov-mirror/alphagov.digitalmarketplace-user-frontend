@@ -25,8 +25,8 @@ from ..helpers.login_helpers import redirect_logged_in_user
 from ... import data_api_client
 
 
-NO_ACCOUNT_MESSAGE = Markup("""Make sure you've entered the right email address and password. Accounts
-    are locked after 5 failed attempts. If you’ve forgotten your password you can reset it by clicking
+NO_ACCOUNT_MESSAGE = Markup("""Check you've entered the correct email address and password. Accounts
+    are locked after 5 failed attempts. If you’ve forgotten your password you can reset it by selecting
     ‘Forgotten password’.""")
 
 
@@ -60,11 +60,11 @@ def process_login():
                 extra={'email_hash': hash_string(form.email_address.data)})
             errors = govuk_errors({
                 "email_address": {
-                    "message": "Check your email address",
+                    "message": "Enter your email address",
                     "input_name": "email_address",
                 },
                 "password": {
-                    "message": "Check your password",
+                    "message": "Enter your password",
                     "input_name": "password",
                 },
             })
