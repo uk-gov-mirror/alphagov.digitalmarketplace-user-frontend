@@ -13,7 +13,10 @@ from flask import (
 from flask_login import logout_user, login_user
 
 from dmutils.flask import timed_render_template as render_template
-from dmutils.forms.helpers import get_errors_from_wtform
+from dmutils.forms.errors import (
+    get_errors_from_wtform,
+    govuk_errors,
+)
 from dmutils.user import User
 from dmutils.email.helpers import hash_string
 
@@ -56,11 +59,21 @@ def process_login():
             current_app.logger.info(
                 "login.fail: failed to log in {email_hash}",
                 extra={'email_hash': hash_string(form.email_address.data)})
+            errors = govuk_errors({
+                "email_address": {
+                    "message": "Check your email address",
+                    "input_name": "email_address",
+                },
+                "password": {
+                    "message": "Check your password",
+                    "input_name": "password",
+                },
+            })
             flash(NO_ACCOUNT_MESSAGE, "error")
             return render_template(
                 "auth/login.html",
                 form=form,
-                errors=get_errors_from_wtform(form),
+                errors=errors,
                 next=next_url), 403
 
         user = User.from_json(user_json)
