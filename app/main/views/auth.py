@@ -2,7 +2,6 @@
 from flask_login import current_user
 from flask import (
     current_app,
-    flash,
     get_flashed_messages,
     Markup,
     redirect,
@@ -13,7 +12,10 @@ from flask import (
 from flask_login import logout_user, login_user
 
 from dmutils.flask import timed_render_template as render_template
-from dmutils.forms.helpers import get_errors_from_wtform
+from dmutils.forms.errors import (
+    get_errors_from_wtform,
+    govuk_errors,
+)
 from dmutils.user import User
 from dmutils.email.helpers import hash_string
 
@@ -23,8 +25,8 @@ from ..helpers.login_helpers import redirect_logged_in_user
 from ... import data_api_client
 
 
-NO_ACCOUNT_MESSAGE = Markup("""Make sure you've entered the right email address and password. Accounts
-    are locked after 5 failed attempts. If you’ve forgotten your password you can reset it by clicking
+NO_ACCOUNT_MESSAGE = Markup("""Check you’ve entered the correct email address and password. Accounts
+    are locked after 5 failed attempts. If you’ve forgotten your password you can reset it by selecting
     ‘Forgotten password’.""")
 
 
@@ -56,11 +58,21 @@ def process_login():
             current_app.logger.info(
                 "login.fail: failed to log in {email_hash}",
                 extra={'email_hash': hash_string(form.email_address.data)})
-            flash(NO_ACCOUNT_MESSAGE, "error")
+            errors = govuk_errors({
+                "email_address": {
+                    "message": "Enter your email address",
+                    "input_name": "email_address",
+                },
+                "password": {
+                    "message": "Enter your password",
+                    "input_name": "password",
+                },
+            })
             return render_template(
                 "auth/login.html",
                 form=form,
-                errors=get_errors_from_wtform(form),
+                errors=errors,
+                error_summary_description_text=NO_ACCOUNT_MESSAGE,
                 next=next_url), 403
 
         user = User.from_json(user_json)
