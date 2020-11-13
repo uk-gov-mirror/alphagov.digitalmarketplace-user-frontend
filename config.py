@@ -27,6 +27,7 @@ class Config(object):
     DM_DATA_API_URL = None
     DM_DATA_API_AUTH_TOKEN = None
     DM_NOTIFY_API_KEY = None
+    DM_REDIS_SERVICE_NAME = None
 
     NOTIFY_TEMPLATES = {
         "reset_password": "4ae02cdd-65fd-417f-8c24-61260229f9af",
