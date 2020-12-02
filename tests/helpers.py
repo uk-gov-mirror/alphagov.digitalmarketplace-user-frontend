@@ -22,6 +22,9 @@ class BaseApplicationTest(object):
         self.app_env_var_mock = patch.dict('gds_metrics.os.environ', {'PROMETHEUS_METRICS_PATH': '/_metrics'})
         self.app_env_var_mock.start()
 
+        self.session_mock = patch('dmutils.session.init_app')
+        self.session_mock.start()
+
         self.app = create_app('test')
         self.client = self.app.test_client()
         self.get_user_patch = None
@@ -29,6 +32,7 @@ class BaseApplicationTest(object):
     def teardown_method(self, method):
         self.teardown_login()
         self.app_env_var_mock.stop()
+        self.session_mock.stop()
 
     @staticmethod
     def user(id, email_address, supplier_id, supplier_name, name,
