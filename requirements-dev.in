@@ -14,4 +14,4 @@ pytest-cov
 python-dotenv
 watchdog
 
-git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.8.2#egg=digitalmarketplace-test-utils==2.8.2
+digitalmarketplace-test-utils
