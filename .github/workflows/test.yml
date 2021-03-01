@@ -9,10 +9,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup python (${{ matrix.python-version }})
-      uses: actions/setup-python@v2
+    - name: Setup Node cache
+      uses: actions/cache@v2
+      id: node-cache
       with:
-        python-version: ${{ matrix.python-version }}
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
 
     - name: Setup Python cache
       uses: actions/cache@v2
@@ -22,26 +26,25 @@ jobs:
         key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: venv-${{ runner.os }}-${{ matrix.python-version }}-
 
-    - name: Setup Node cache
-      uses: actions/cache@v2
-      id: node-cache
+    - name: Setup python (${{ matrix.python-version }})
+      uses: actions/setup-python@v2
       with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    
+        python-version: ${{ matrix.python-version }}
+
     - name: Install Node version
       shell: bash -l {0}
       run: nvm install
 
+    - name: Install developer tools
+      run: make bootstrap
+
     - name: Install Node dependencies
-      run:  make npm-install
+      run:  invoke npm-install
       if: steps.node-cache.outputs.cache-hit != 'true'
 
-    - name: Install python dependencies
-      run: make requirements-dev
+    - name: Install dependencies
+      run: invoke requirements-dev
       if: steps.python-cache.outputs.cache-hit != 'true'
 
-    - name: Run python tests
-      run: make test
+    - name: Run tests
+      run: invoke test
